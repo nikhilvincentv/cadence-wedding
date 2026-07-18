@@ -90,7 +90,7 @@ export default function TimelineView({ data, persist, live }) {
       <div className="topbar">
         <div>
           <h1 className="page">The day, and everything it touches</h1>
-          <div className="page-sub">Build your day-of timeline, then change one thing and let Cadence trace the ripple.</div>
+          <div className="page-sub">Build your day-of timeline, then change one thing and let AIsle trace the ripple.</div>
         </div>
         <button
           className="btn sm"
@@ -190,7 +190,7 @@ function CascadeResult({ result, sevClass, copy, copied }) {
     <div className="stack fade-in">
       <div className="card pad-lg">
         <div className="row between mb-sm">
-          <h2 className="section-title" style={{ margin: 0 }}>How Cadence thought about it</h2>
+          <h2 className="section-title" style={{ margin: 0 }}>How AIsle thought about it</h2>
           <div className="row gap-sm">
             <span className={`badge ${sevClass}`}>{result.severity} impact</span>
             <span className={`badge ${result.source === 'model' ? 'ok' : 'ghost'}`}>{result.source === 'model' ? 'live model' : 'demo reasoner'}</span>

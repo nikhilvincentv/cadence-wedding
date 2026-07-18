@@ -161,6 +161,6 @@ if (existsSync(dist)) {
 
 app.listen(PORT, () => {
   const s = aiStatus()
-  console.log(`Cadence server on http://localhost:${PORT}`)
+  console.log(`AIsle server on http://localhost:${PORT}`)
   console.log(`AI: ${s.enabled ? `live (${s.model} @ ${s.provider})` : 'demo mode (no key - using built-in reasoner)'}`)
 })

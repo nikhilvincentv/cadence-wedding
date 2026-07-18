@@ -29,7 +29,7 @@ export default function Questionnaire({ data, persist }) {
     { title: "Who's getting married?", desc: 'The essentials first.', valid: !!f.couple.trim() },
     { title: 'Where & how big?', desc: 'Set the scale of your day.', valid: true },
     { title: "What's your budget?", desc: 'We track every dollar against it.', valid: true },
-    { title: 'What matters most?', desc: 'So Cadence knows what to protect.', valid: true },
+    { title: 'What matters most?', desc: 'So AIsle knows what to protect.', valid: true },
   ]
   const last = step === steps.length - 1
   const cur = steps[step]
@@ -68,7 +68,7 @@ export default function Questionnaire({ data, persist }) {
         <div className="topbar">
           <div>
             <h1 className="page">Building your plan…</h1>
-            <div className="page-sub">Cadence's AI is setting up your tasks, vendors, timeline, and budget from your answers.</div>
+            <div className="page-sub">AIsle's AI is setting up your tasks, vendors, timeline, and budget from your answers.</div>
           </div>
         </div>
         <div className="card pad-lg" style={{ display: 'grid', placeItems: 'center', minHeight: 240, textAlign: 'center', gap: 16 }}>

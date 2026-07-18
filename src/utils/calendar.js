@@ -30,27 +30,27 @@ export function googleCalUrl(wedding, ev) {
     action: 'TEMPLATE',
     text: ev.title || 'Wedding event',
     dates: `${t.start}/${t.end}`,
-    details: `${wedding.couple || ''} wedding · via Cadence`,
+    details: `${wedding.couple || ''} wedding · via AIsle`,
     location: wedding.venue || '',
   })
   return `https://calendar.google.com/calendar/render?${params.toString()}`
 }
 
 export function buildIcs(wedding, timeline) {
-  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Cadence//Wedding OS//EN', 'CALSCALE:GREGORIAN']
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//AIsle//Wedding OS//EN', 'CALSCALE:GREGORIAN']
   const stamp = fmt(new Date())
   ;(timeline || []).forEach((ev, i) => {
     const t = eventTimes(wedding, ev)
     if (!t) return
     lines.push(
       'BEGIN:VEVENT',
-      `UID:cadence-${i}-${ev.id || i}@cadence.app`,
+      `UID:aisle-${i}-${ev.id || i}@aisle.app`,
       `DTSTAMP:${stamp}`,
       `DTSTART:${t.start}`,
       `DTEND:${t.end}`,
       `SUMMARY:${esc(ev.title)}`,
       `LOCATION:${esc(wedding.venue)}`,
-      `DESCRIPTION:${esc((wedding.couple || '') + ' wedding · via Cadence')}`,
+      `DESCRIPTION:${esc((wedding.couple || '') + ' wedding · via AIsle')}`,
       'END:VEVENT'
     )
   })

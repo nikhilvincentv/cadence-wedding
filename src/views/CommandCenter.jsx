@@ -135,7 +135,7 @@ export default function CommandCenter({ data, persist, status, goto, days }) {
               </div>
             </div>
             <div className="faint" style={{ fontSize: 12, maxWidth: 300, textAlign: 'right' }}>
-              Cadence weighs these when the AI reasons about your day.
+              AIsle weighs these when the AI reasons about your day.
             </div>
           </div>
         </div>

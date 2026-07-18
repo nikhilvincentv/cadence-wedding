@@ -122,7 +122,7 @@ export default function Seating({ data, persist, live }) {
       {result && !result.error && (
         <div className="card pad-lg mt fade-in">
           <div className="row between mb-sm">
-            <h2 className="section-title" style={{ margin: 0 }}>How Cadence seated them</h2>
+            <h2 className="section-title" style={{ margin: 0 }}>How AIsle seated them</h2>
             <span className={`badge ${result.source === 'model' ? 'ok' : 'ghost'}`}>{result.source === 'model' ? 'live model' : 'demo reasoner'}</span>
           </div>
           <div className="muted" style={{ fontSize: 14, marginBottom: 10 }}>{result.summary}</div>

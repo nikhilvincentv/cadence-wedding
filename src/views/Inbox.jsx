@@ -40,14 +40,14 @@ export default function Inbox({ data, persist, live }) {
       <div className="topbar">
         <div>
           <h1 className="page">Your inbox, sorted by the AI</h1>
-          <div className="page-sub">Cadence reads vendor emails and pulls out payments, date changes, and deadlines automatically.</div>
+          <div className="page-sub">AIsle reads vendor emails and pulls out payments, date changes, and deadlines automatically.</div>
         </div>
         {!connected && <button className="btn primary" onClick={() => setConnected(true)}>Connect Gmail</button>}
       </div>
 
       {!connected ? (
         <div className="card pad-lg" style={{ textAlign: 'center', padding: 40 }}>
-          <div className="muted" style={{ fontSize: 15, marginBottom: 6 }}>Connect your inbox to let Cadence watch for vendor updates.</div>
+          <div className="muted" style={{ fontSize: 15, marginBottom: 6 }}>Connect your inbox to let AIsle watch for vendor updates.</div>
           <div className="faint" style={{ fontSize: 12.5 }}>Demo mode loads a sample vendor inbox — the AI extraction below is live.</div>
           <button className="btn primary mt" onClick={() => setConnected(true)}>Connect Gmail (demo)</button>
         </div>
@@ -74,7 +74,7 @@ export default function Inbox({ data, persist, live }) {
                   {r && !r.error && (
                     <div className="email-extract fade-in">
                       <div className="row between mb-sm">
-                        <b style={{ fontSize: 13 }}>What Cadence found</b>
+                        <b style={{ fontSize: 13 }}>What AIsle found</b>
                         <span className={`badge ${r.source === 'model' ? 'ok' : 'ghost'}`}>{r.source === 'model' ? 'live model' : 'demo reasoner'}</span>
                       </div>
                       <div className="muted" style={{ fontSize: 13, marginBottom: 8 }}>{r.summary}</div>

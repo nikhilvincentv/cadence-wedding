@@ -101,8 +101,8 @@ export default function LoginScreen({ onSkip }) {
   return (
     <div className="login-wrap">
       <div className="login-brand">
-        <div className="login-mark">C</div>
-        <div className="login-name">Cadence</div>
+        <div className="login-mark">A</div>
+        <div className="login-name">AIsle</div>
         <div className="login-sub">Wedding OS</div>
         <p className="login-tag">
           Plan less. Panic never.<br />

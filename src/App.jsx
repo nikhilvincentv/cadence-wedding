@@ -120,9 +120,9 @@ export default function App() {
     <div className="app">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark">C</div>
+          <div className="brand-mark">A</div>
           <div>
-            <div className="brand-name">Cadence</div>
+            <div className="brand-name">AIsle</div>
             <div className="brand-sub">Wedding OS</div>
           </div>
         </div>
@@ -169,7 +169,7 @@ export default function App() {
         {buildingPlan && (
           <div className="card pad-lg" style={{ marginBottom: 18, display: 'flex', alignItems: 'center', gap: 12 }}>
             <span className="spin" />
-            <span className="muted">Cadence is building your starter plan — tasks, vendors, timeline, and budget…</span>
+            <span className="muted">AIsle is building your starter plan — tasks, vendors, timeline, and budget…</span>
           </div>
         )}
         {view === 'home' && (

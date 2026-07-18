@@ -112,7 +112,7 @@ export default function Contracts({ data, persist, live }) {
       <div className="topbar">
         <div>
           <h1 className="page">Stop reading the fine print</h1>
-          <div className="page-sub">Paste any vendor contract. Cadence pulls the deadlines, hidden fees, and traps - and saves them to your plan.</div>
+          <div className="page-sub">Paste any vendor contract. AIsle pulls the deadlines, hidden fees, and traps - and saves them to your plan.</div>
         </div>
       </div>
 
@@ -157,7 +157,7 @@ export default function Contracts({ data, persist, live }) {
             <div className="card pad-lg" style={{ display: 'grid', placeItems: 'center', minHeight: 260, textAlign: 'center' }}>
               <div>
                 <div className="muted mt-sm">Pick an example or paste a contract, then hit <b>Scan</b>.</div>
-                <div className="faint" style={{ fontSize: 12.5, marginTop: 8 }}>Cadence extracts payments, hidden fees, gratuity, cancellation terms and key dates.</div>
+                <div className="faint" style={{ fontSize: 12.5, marginTop: 8 }}>AIsle extracts payments, hidden fees, gratuity, cancellation terms and key dates.</div>
               </div>
             </div>
           )}

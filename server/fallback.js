@@ -96,7 +96,7 @@ const RAIN = {
 
 function genericCascade(change) {
   return {
-    summary: `Cadence traced the ripple effects of: "${change}".`,
+    summary: `AIsle traced the ripple effects of: "${change}".`,
     severity: 'medium',
     reasoning: [
       'Located every timeline event and vendor the change touches.',
@@ -117,7 +117,7 @@ function genericCascade(change) {
       tradeoff: 'Minor earlier start; ceremony and sunset photos untouched.',
     },
     notifications: [
-      { vendorId: 'planner', vendorName: 'Day-of coordination', channel: 'text', message: `Heads up - timeline change ("${change}"). Cadence has re-sequenced the affected blocks; updated call times going out to vendors now.` },
+      { vendorId: 'planner', vendorName: 'Day-of coordination', channel: 'text', message: `Heads up - timeline change ("${change}"). AIsle has re-sequenced the affected blocks; updated call times going out to vendors now.` },
     ],
   }
 }

@@ -1,9 +1,9 @@
 {
-  "name": "cadence",
+  "name": "aisle",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Cadence - AI coordination layer for wedding planning.",
+  "description": "AIsle - AI coordination layer for wedding planning.",
   "scripts": {
     "dev": "concurrently -k -n server,web -c magenta,cyan \"npm:server\" \"npm:web\"",
     "server": "node server/index.js",

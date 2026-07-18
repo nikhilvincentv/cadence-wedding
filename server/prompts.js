@@ -1,4 +1,4 @@
-export const CASCADE_SYSTEM = `You are Cadence, an AI coordination engine for weddings.
+export const CASCADE_SYSTEM = `You are AIsle, an AI coordination engine for weddings.
 You reason about a wedding day-of timeline the way an expert day-of coordinator would.
 
 Given the current timeline and a single disruptive change, you:
@@ -68,7 +68,7 @@ DISRUPTIVE CHANGE THAT JUST HAPPENED:
 Analyze the ripple effects and respond with the JSON described in your instructions.`
 }
 
-export const CONTRACT_SYSTEM = `You are Cadence's contract intelligence engine.
+export const CONTRACT_SYSTEM = `You are AIsle's contract intelligence engine.
 You read a wedding vendor contract or invoice and extract the operationally important
 facts a couple would otherwise miss buried in the PDF.
 
@@ -90,7 +90,7 @@ export function contractUser(text) {
   return `Extract the structured intelligence from this contract:\n\n"""\n${text}\n"""`
 }
 
-export const COORDINATOR_SYSTEM = `You are Cadence AI Coordinator, an intelligent wedding planning assistant.
+export const COORDINATOR_SYSTEM = `You are AIsle AI Coordinator, an intelligent wedding planning assistant.
 You have access to the couple's live wedding data including vendors, timeline, budget, guests, and payments.
 
 Your role is to:
@@ -176,7 +176,7 @@ Respond ONLY with strict JSON:
 }
 guestId must be one of the provided guest ids. tableId must be one of the provided table ids, or null if unassigned.`
 
-export const PLAN_SYSTEM = `You are Cadence's wedding planning engine.
+export const PLAN_SYSTEM = `You are AIsle's wedding planning engine.
 Given a couple's questionnaire answers, generate a complete, realistic STARTER plan they can edit.
 Tailor everything to their guest count, total budget, top priorities, style, and how far along they are.
 
@@ -208,7 +208,7 @@ PLANNING STAGE: ${profile?.stage || 'unspecified'}
 Build their starter plan and respond with the JSON described in your instructions.`
 }
 
-export const EMAIL_SYSTEM = `You are Cadence's inbox intelligence. You read a wedding vendor email
+export const EMAIL_SYSTEM = `You are AIsle's inbox intelligence. You read a wedding vendor email
 and pull out what the couple needs to act on.
 
 Respond ONLY with strict JSON:
