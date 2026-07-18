@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { fullState } from './data.js'
 import { aiStatus, chatJSON } from './ai.js'
-import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser, SEATING_SYSTEM, seatingUser, EMAIL_SYSTEM, emailUser } from './prompts.js'
-import { cascadeFallback, contractFallback, seatingFallback, emailFallback } from './fallback.js'
+import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser, SEATING_SYSTEM, seatingUser, EMAIL_SYSTEM, emailUser, PLAN_SYSTEM, planUser } from './prompts.js'
+import { cascadeFallback, contractFallback, seatingFallback, emailFallback, planFallback } from './fallback.js'
 import { getUserState, saveUserState } from './db.js'
 import { reindexUser, searchUser, buildDocs, typesenseEnabled } from './typesense.js'
 import { findNearby } from './places.js'
@@ -110,6 +110,17 @@ app.post('/api/seating', async (req, res) => {
     return res.json({ ...result, source: 'model' })
   } catch (err) {
     return res.json({ ...seatingFallback({ guests, tables }), source: 'demo' })
+  }
+})
+
+app.post('/api/plan', async (req, res) => {
+  const { wedding, profile } = req.body || {}
+  if (!wedding) return res.status(400).json({ error: 'Missing wedding.' })
+  try {
+    const result = await chatJSON({ system: PLAN_SYSTEM, user: planUser({ wedding, profile }), temperature: 0.4, maxTokens: 1800 })
+    return res.json({ ...result, source: 'model' })
+  } catch (err) {
+    return res.json({ ...planFallback({ wedding, profile }), source: 'demo' })
   }
 })
 

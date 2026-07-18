@@ -193,6 +193,66 @@ export function contractFallback(text = '') {
   return { vendorName, category, payments, hiddenFees, gratuityIncluded, cancellation, keyDates, watchOuts }
 }
 
+export function planFallback({ wedding = {}, profile = {} } = {}) {
+  const budget = Number(wedding.budgetTotal) || 40000
+  const priorities = (profile.priorities || []).map((p) => p.toLowerCase())
+  const base = [
+    ['Venue', 0.4, 'venue'],
+    ['Catering', 0.24, 'food'],
+    ['Photography', 0.12, 'photo'],
+    ['Florals', 0.08, 'floral'],
+    ['Music / DJ', 0.06, 'music'],
+    ['Attire', 0.05, 'attire'],
+    ['Cake & Dessert', 0.03, 'food'],
+    ['Miscellaneous', 0.02, ''],
+  ]
+  const weights = base.map(([name, w, key]) => {
+    const boosted = priorities.some((p) => key && p.includes(key)) ? w * 1.4 : w
+    return { name, w: boosted }
+  })
+  const total = weights.reduce((s, x) => s + x.w, 0)
+  const budgetCategories = weights.map((x) => ({ name: x.name, projected: Math.round((x.w / total) * budget) }))
+
+  const vendors = [
+    { name: 'Photographer', category: 'Photography' },
+    { name: 'Caterer', category: 'Catering' },
+    { name: 'Florist', category: 'Florals' },
+    { name: 'DJ or Band', category: 'Music / DJ' },
+    { name: 'Hair & Makeup', category: 'Beauty' },
+    { name: 'Officiant', category: 'Officiant' },
+    { name: 'Cake Baker', category: 'Cake' },
+    { name: 'Venue Coordinator', category: 'Venue' },
+  ]
+
+  const tasks = [
+    'Confirm your final guest list and collect addresses',
+    'Book your top-priority vendors first',
+    'Send save-the-dates',
+    'Set your budget per category and track deposits',
+    'Schedule a venue walkthrough',
+    'Choose your wedding party',
+    'Order invitations',
+    'Book hair & makeup trials',
+    'Plan the day-of timeline with your vendors',
+    'Arrange transportation and hotel blocks for guests',
+  ]
+
+  const timeline = [
+    { time: '8:00 AM', title: 'Hair & makeup begins', durationMin: 210 },
+    { time: '11:30 AM', title: 'Photographer arrives', durationMin: 90 },
+    { time: '1:00 PM', title: 'First look', durationMin: 30 },
+    { time: '1:30 PM', title: 'Wedding party portraits', durationMin: 60 },
+    { time: '3:00 PM', title: 'Guests arrive / shuttle', durationMin: 45 },
+    { time: '4:00 PM', title: 'Ceremony', durationMin: 30 },
+    { time: '4:30 PM', title: 'Cocktail hour', durationMin: 60 },
+    { time: '5:30 PM', title: 'Grand entrance & dinner', durationMin: 75 },
+    { time: '7:00 PM', title: 'Toasts & first dance', durationMin: 30 },
+    { time: '8:00 PM', title: 'Open dancing', durationMin: 150 },
+  ]
+
+  return { summary: 'Starter plan generated from your questionnaire — edit anything.', tasks, vendors, timeline, budgetCategories }
+}
+
 export function emailFallback(email = {}) {
   const t = `${email.subject || ''} ${email.body || ''}`
   const payments = []

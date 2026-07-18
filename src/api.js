@@ -34,6 +34,15 @@ export const runCascade = (body) =>
     .then(j)
     .catch(() => ({ ...cascadeFallback(body.change), source: 'demo' }))
 
+export const generatePlan = (wedding, profile) =>
+  fetch('/api/plan', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ wedding, profile }),
+  })
+    .then(j)
+    .catch(() => ({ error: 'Could not generate plan.' }))
+
 export const scanEmail = (email) =>
   fetch('/api/email', {
     method: 'POST',

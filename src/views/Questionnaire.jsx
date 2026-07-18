@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { generatePlan } from '../api.js'
 
 const PRIORITIES = ['Photography', 'Food & drink', 'Music / DJ', 'Florals', 'Venue', 'Attire']
 const STYLES = ['Classic', 'Modern', 'Rustic', 'Bohemian', 'Glam', 'Minimalist']
@@ -8,9 +9,18 @@ function newId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
   return 'w_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36)
 }
+const uid = () => Math.random().toString(36).slice(2, 9)
+function parseMinutes(time) {
+  const m = String(time || '').match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i)
+  if (!m) return 0
+  let h = Number(m[1]) % 12
+  if (m[3] && m[3].toUpperCase() === 'PM') h += 12
+  return h * 60 + Number(m[2])
+}
 
 export default function Questionnaire({ data, persist }) {
   const [step, setStep] = useState(0)
+  const [generating, setGenerating] = useState(false)
   const [f, setF] = useState({ couple: '', date: '', venue: '', guestCount: '', budgetTotal: '', priorities: [], style: '', stage: '' })
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }))
   const togglePriority = (p) => setF((s) => ({ ...s, priorities: s.priorities.includes(p) ? s.priorities.filter((x) => x !== p) : [...s.priorities, p] }))
@@ -24,26 +34,50 @@ export default function Questionnaire({ data, persist }) {
   const last = step === steps.length - 1
   const cur = steps[step]
 
-  function finish() {
+  async function finish() {
     const dateLabel = f.date
       ? new Date(f.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
       : ''
-    persist({
-      ...data,
-      weddingId: newId(),
-      wedding: {
-        ...data.wedding,
-        couple: f.couple.trim(),
-        date: f.date,
-        dateLabel,
-        venue: f.venue.trim(),
-        guestCount: Number(f.guestCount) || 0,
-        budgetTotal: Number(f.budgetTotal) || 0,
-        budgetSpent: 0,
-        sunset: '',
-      },
-      profile: { priorities: f.priorities, style: f.style, stage: f.stage, createdAt: new Date().toISOString() },
-    })
+    const wedding = {
+      ...data.wedding,
+      couple: f.couple.trim(),
+      date: f.date,
+      dateLabel,
+      venue: f.venue.trim(),
+      guestCount: Number(f.guestCount) || 0,
+      budgetTotal: Number(f.budgetTotal) || 0,
+      budgetSpent: 0,
+      sunset: '',
+    }
+    const profile = { priorities: f.priorities, style: f.style, stage: f.stage, createdAt: new Date().toISOString() }
+
+    setGenerating(true)
+    const plan = await generatePlan(wedding, profile)
+
+    const tasks = (plan.tasks || []).map((d) => ({ id: uid(), checked: false, description: typeof d === 'string' ? d : d.description || d.title || '' }))
+    const vendors = (plan.vendors || []).map((v) => ({ id: uid(), name: v.name || 'Vendor', category: v.category || '', contact: '', status: 'pending', rating: null }))
+    const timeline = (plan.timeline || []).map((e) => ({ id: uid(), time: e.time || '12:00 PM', minutes: parseMinutes(e.time), title: e.title || 'Event', vendorId: '', durationMin: Number(e.durationMin) || 30, locked: false, note: '' }))
+    const budgetCategories = (plan.budgetCategories || []).map((c) => ({ id: uid(), name: c.name || 'Category', projected: Number(c.projected) || 0, actual: 0 }))
+
+    persist({ ...data, weddingId: newId(), wedding, profile, tasks, vendors, timeline, budgetCategories })
+  }
+
+  if (generating) {
+    return (
+      <div className="fade-in">
+        <div className="topbar">
+          <div>
+            <h1 className="page">Building your plan…</h1>
+            <div className="page-sub">Cadence's AI is setting up your tasks, vendors, timeline, and budget from your answers.</div>
+          </div>
+        </div>
+        <div className="card pad-lg" style={{ display: 'grid', placeItems: 'center', minHeight: 240, textAlign: 'center', gap: 16 }}>
+          <span className="spin" style={{ width: 24, height: 24 }} />
+          <div className="muted" style={{ fontSize: 15 }}>Generating your starter plan — this takes a few seconds.</div>
+          <div className="faint" style={{ fontSize: 12.5 }}>You'll be able to edit everything.</div>
+        </div>
+      </div>
+    )
   }
 
   return (

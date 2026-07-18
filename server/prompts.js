@@ -176,6 +176,38 @@ Respond ONLY with strict JSON:
 }
 guestId must be one of the provided guest ids. tableId must be one of the provided table ids, or null if unassigned.`
 
+export const PLAN_SYSTEM = `You are Cadence's wedding planning engine.
+Given a couple's questionnaire answers, generate a complete, realistic STARTER plan they can edit.
+Tailor everything to their guest count, total budget, top priorities, style, and how far along they are.
+
+Respond ONLY with strict JSON:
+{
+  "summary": "one sentence on the plan you built",
+  "tasks": ["short actionable task", ...],
+  "vendors": [ { "name": "Photographer", "category": "Photography" }, ... ],
+  "timeline": [ { "time": "8:00 AM", "title": "Hair & makeup begins", "durationMin": 210 }, ... ],
+  "budgetCategories": [ { "name": "Venue", "projected": 18000 }, ... ]
+}
+Rules:
+- 8-12 tasks, ordered by urgency for their planning stage.
+- vendors = the roles they still need to book (Photography, Catering, Florals, Music, Beauty, Cake, Officiant, Venue, etc.).
+- 8-12 timeline events for a realistic wedding day, in order.
+- budgetCategories must sum to approximately their total budget, and give MORE budget to their stated priorities.
+- All amounts are plain numbers (no $ or commas).`
+
+export function planUser({ wedding, profile }) {
+  return `COUPLE: ${wedding.couple || 'the couple'}
+DATE: ${wedding.dateLabel || wedding.date || 'TBD'}
+VENUE: ${wedding.venue || 'TBD'}
+GUESTS: ${wedding.guestCount || 'unknown'}
+TOTAL BUDGET: $${wedding.budgetTotal || 0}
+TOP PRIORITIES: ${(profile?.priorities || []).join(', ') || 'none stated'}
+STYLE: ${profile?.style || 'unspecified'}
+PLANNING STAGE: ${profile?.stage || 'unspecified'}
+
+Build their starter plan and respond with the JSON described in your instructions.`
+}
+
 export const EMAIL_SYSTEM = `You are Cadence's inbox intelligence. You read a wedding vendor email
 and pull out what the couple needs to act on.
 
