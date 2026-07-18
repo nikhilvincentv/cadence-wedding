@@ -13,6 +13,7 @@ import Seating from './views/Seating.jsx'
 import SearchPalette from './components/SearchPalette.jsx'
 import Venue from './views/Venue.jsx'
 import Inbox from './views/Inbox.jsx'
+import Inspiration from './views/Inspiration.jsx'
 
 const NAV = [
   { id: 'home',        label: 'Dashboard',       icon: '⌂' },
@@ -196,7 +197,7 @@ export default function App() {
           <Venue data={data} persist={persist} />
         )}
         {view === 'inspiration' && (
-          <div className="view-placeholder">Inspiration — coming soon</div>
+          <Inspiration data={data} persist={persist} />
         )}
         {view === 'inbox' && (
           <Inbox data={data} persist={persist} live={live} />
