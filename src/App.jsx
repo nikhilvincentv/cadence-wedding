@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useUser, useClerk } from '@clerk/clerk-react'
-import { getStatus, getState, saveState, daysUntil, generatePlan } from './api.js'
+import { getStatus, getState, saveState, daysUntil, generatePlan, findNearbyVendors } from './api.js'
 import Onboarding from './Onboarding.jsx'
 import CommandCenter from './views/CommandCenter.jsx'
 import TimelineView from './views/TimelineView.jsx'
@@ -76,13 +76,18 @@ export default function App() {
       if (m[3] && m[3].toUpperCase() === 'PM') h += 12
       return h * 60 + Number(m[2])
     }
-    generatePlan(data.wedding, data.profile)
-      .then((plan) => {
+    const venue = data.wedding?.venue
+    Promise.all([
+      generatePlan(data.wedding, data.profile),
+      venue ? findNearbyVendors(venue).catch(() => null) : Promise.resolve(null),
+    ])
+      .then(([plan, nearby]) => {
         const tasks = (plan.tasks || []).map((d) => ({ id: uid(), checked: false, description: typeof d === 'string' ? d : d.description || d.title || '' }))
         const vendors = (plan.vendors || []).map((v) => ({ id: uid(), name: v.name || 'Vendor', category: v.category || '', contact: '', status: 'pending', rating: null }))
         const timeline = (plan.timeline || []).map((e) => ({ id: uid(), time: e.time || '12:00 PM', minutes: pm(e.time), title: e.title || 'Event', vendorId: '', durationMin: Number(e.durationMin) || 30, locked: false, note: '' }))
         const budgetCategories = (plan.budgetCategories || []).map((c) => ({ id: uid(), name: c.name || 'Category', projected: Number(c.projected) || 0, actual: 0 }))
-        persist({ ...data, tasks, vendors, timeline, budgetCategories })
+        const nearbyCache = nearby && nearby.center ? { venue, center: nearby.center, vendors: nearby.vendors } : data.nearbyCache || null
+        persist({ ...data, tasks, vendors, timeline, budgetCategories, nearbyCache })
         setBuildingPlan(false)
       })
       .catch(() => setBuildingPlan(false))
