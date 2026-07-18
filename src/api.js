@@ -34,6 +34,20 @@ export const runCascade = (body) =>
     .then(j)
     .catch(() => ({ ...cascadeFallback(body.change), source: 'demo' }))
 
+export const reindexSearch = (userId, data) =>
+  fetch('/api/search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-user-id': userId || 'demo-user' },
+    body: JSON.stringify({ data }),
+  })
+    .then(j)
+    .catch(() => ({ enabled: false }))
+
+export const searchQuery = (userId, q) =>
+  fetch(`/api/search?q=${encodeURIComponent(q)}`, { headers: { 'x-user-id': userId || 'demo-user' } })
+    .then(j)
+    .catch(() => ({ enabled: false, hits: [] }))
+
 export const runSeating = (body) =>
   fetch('/api/seating', {
     method: 'POST',

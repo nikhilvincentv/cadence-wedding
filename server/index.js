@@ -9,6 +9,7 @@ import { aiStatus, chatJSON } from './ai.js'
 import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser, SEATING_SYSTEM, seatingUser } from './prompts.js'
 import { cascadeFallback, contractFallback, seatingFallback } from './fallback.js'
 import { getUserState, saveUserState } from './db.js'
+import { reindexUser, searchUser, buildDocs, typesenseEnabled } from './typesense.js'
 
 const app = express()
 app.use(cors())
@@ -62,6 +63,25 @@ app.post('/api/cascade', async (req, res) => {
     return res.json({ ...result, source: 'model' })
   } catch (err) {
     return res.json({ ...cascadeFallback(change), source: 'demo', note: String(err.message || err) })
+  }
+})
+
+app.post('/api/search', async (req, res) => {
+  const userId = req.header('x-user-id') || 'demo-user'
+  try {
+    const docs = buildDocs(userId, req.body?.data || {})
+    res.json(await reindexUser(userId, docs))
+  } catch (err) {
+    res.status(200).json({ enabled: typesenseEnabled, indexed: 0, error: String(err.message || err) })
+  }
+})
+
+app.get('/api/search', async (req, res) => {
+  const userId = req.header('x-user-id') || 'demo-user'
+  try {
+    res.json(await searchUser(userId, req.query.q || ''))
+  } catch (err) {
+    res.status(200).json({ enabled: typesenseEnabled, hits: [], error: String(err.message || err) })
   }
 })
 

@@ -9,6 +9,7 @@ import Guests from './views/Guests.jsx'
 import AICoordinator from './views/AICoordinator.jsx'
 import Vendors from './views/Vendors.jsx'
 import Seating from './views/Seating.jsx'
+import SearchPalette from './components/SearchPalette.jsx'
 
 const NAV = [
   { id: 'home',        label: 'Dashboard',       icon: '⌂' },
@@ -30,9 +31,21 @@ export default function App() {
   const [view, setView] = useState('home')
   const [status, setStatus] = useState(null)
   const [data, setData] = useState(null)
+  const [searchOpen, setSearchOpen] = useState(false)
 
   useEffect(() => {
     getStatus().then(setStatus).catch(() => setStatus({ enabled: false, model: 'demo', provider: 'built-in' }))
+  }, [])
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setSearchOpen(true)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
   }, [])
 
   useEffect(() => {
@@ -65,6 +78,11 @@ export default function App() {
             <div className="brand-name">Cadence</div>
             <div className="brand-sub">Wedding OS</div>
           </div>
+        </div>
+        <div className="nav-item search-trigger" onClick={() => setSearchOpen(true)}>
+          <span className="nav-ico">⌕</span>
+          Search
+          <span className="kbd-hint">⌘K</span>
         </div>
         {NAV.map((n) => (
           <div key={n.id} className={`nav-item ${view === n.id ? 'active' : ''}`} onClick={() => setView(n.id)}>
@@ -123,6 +141,10 @@ export default function App() {
           <AICoordinator data={data} persist={persist} status={status} />
         )}
       </main>
+
+      {searchOpen && (
+        <SearchPalette userId={userId} data={data} goto={setView} onClose={() => setSearchOpen(false)} />
+      )}
     </div>
   )
 }
