@@ -44,6 +44,12 @@ export async function saveUserState(userId, data) {
     timeline: data.timeline,
     payments: data.payments,
     alerts: data.alerts,
+    guests: data.guests ?? [],
+    budgetCategories: data.budgetCategories ?? [],
+    seatingTables: data.seatingTables ?? [],
+    inboxThreads: data.inboxThreads ?? [],
+    tasks: data.tasks ?? [],
+    contractAnalyses: data.contractAnalyses ?? {},
   }
   await sql`INSERT INTO user_weddings (user_id, data, updated_at)
     VALUES (${userId}, ${JSON.stringify(clean)}::jsonb, now())

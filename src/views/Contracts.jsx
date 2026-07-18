@@ -10,21 +10,53 @@ export default function Contracts({ data, persist, live }) {
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
   const [addedToPlan, setAddedToPlan] = useState(false)
+  const [selectedVendorId, setSelectedVendorId] = useState('')
+  const [textError, setTextError] = useState('')
 
   function pick(c) {
     setPicked(c.id)
     setText(c.text)
     setResult(null)
     setAddedToPlan(false)
+    setTextError('')
+  }
+
+  function handleTextChange(e) {
+    setText(e.target.value)
+    setPicked(null)
+    if (textError) setTextError('')
+  }
+
+  function validateText() {
+    if (text.trim().length < 50) {
+      setTextError('Contract text must be at least 50 characters.')
+      return false
+    }
+    return true
+  }
+
+  // Auto-match vendor by vendorName from result, or use manual selection
+  function resolveVendorId(analysisResult) {
+    if (selectedVendorId) return selectedVendorId
+    const first = (analysisResult.vendorName || '').toLowerCase().split(' ')[0]
+    const match = vendors.find((v) => v.name?.toLowerCase().includes(first) && first)
+    return match?.id || ''
   }
 
   async function scan() {
-    if (!text.trim()) return
+    if (!validateText()) return
     setLoading(true)
     setResult(null)
     setAddedToPlan(false)
     try {
-      setResult(await extractContract(text))
+      const res = await extractContract(text)
+      setResult(res)
+      // Auto-select vendor if a match is found and no manual selection
+      if (!selectedVendorId) {
+        const first = (res.vendorName || '').toLowerCase().split(' ')[0]
+        const match = vendors.find((v) => v.name?.toLowerCase().includes(first) && first)
+        if (match) setSelectedVendorId(match.id)
+      }
     } catch (e) {
       setResult({ error: String(e.message || e) })
     } finally {
@@ -34,20 +66,46 @@ export default function Contracts({ data, persist, live }) {
 
   function addPayments() {
     if (!result?.payments?.length) return
-    const first = (result.vendorName || '').toLowerCase().split(' ')[0]
-    const match = vendors.find((v) => v.name?.toLowerCase().includes(first) && first)
+    const vendorId = resolveVendorId(result)
+    const scannedAt = new Date().toISOString()
     const pays = result.payments.map((p) => ({
       id: uid(),
-      vendorId: match?.id || '',
+      vendorId,
       label: p.label,
       amount: Number(p.amount) || 0,
       dueDate: p.dueDate?.match(/^\d{4}-\d{2}-\d{2}$/) ? p.dueDate : '',
       status: 'due',
       source: `${result.vendorName || 'Contract'} (scanned)`,
     }))
-    persist({ ...data, payments: [...data.payments, ...pays] })
+
+    // Build the ContractAnalysis entry keyed by vendorId
+    const analysis = {
+      vendorId,
+      scannedAt,
+      vendorName: result.vendorName || '',
+      category: result.category || '',
+      payments: result.payments || [],
+      hiddenFees: result.hiddenFees || [],
+      gratuityIncluded: result.gratuityIncluded,
+      cancellation: result.cancellation || '',
+      keyDates: result.keyDates || [],
+      watchOuts: result.watchOuts || [],
+    }
+
+    const nextAnalyses = vendorId
+      ? { ...data.contractAnalyses, [vendorId]: analysis }
+      : data.contractAnalyses
+
+    persist({
+      ...data,
+      payments: [...data.payments, ...pays],
+      contractAnalyses: nextAnalyses,
+    })
     setAddedToPlan(true)
+    setResult((r) => ({ ...r, _scannedAt: scannedAt, _vendorId: vendorId }))
   }
+
+  const scanDisabled = loading || text.trim().length < 50
 
   return (
     <div className="fade-in">
@@ -68,10 +126,30 @@ export default function Contracts({ data, persist, live }) {
               <button key={c.id} className={`chip ${picked === c.id ? 'on' : ''}`} style={{ display: 'block', width: '100%', textAlign: 'left' }} onClick={() => pick(c)}>{c.label}</button>
             ))}
           </div>
-          <textarea className="field mt" rows={10} placeholder="...or paste the contract text here" value={text} onChange={(e) => { setText(e.target.value); setPicked(null) }} style={{ fontFamily: 'var(--mono)', fontSize: 12 }} />
+          <textarea className="field mt" rows={10} placeholder="...or paste the contract text here" value={text} onChange={handleTextChange} style={{ fontFamily: 'var(--mono)', fontSize: 12 }} />
+          {textError && (
+            <div className="validation-error" style={{ fontSize: 12, color: 'var(--red)', marginTop: 6 }}>{textError}</div>
+          )}
+
+          {/* Vendor selector */}
+          <div style={{ marginTop: 12 }}>
+            <label className="faint" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>Associate with vendor (optional)</label>
+            <select
+              className="field"
+              style={{ width: '100%', fontSize: 13 }}
+              value={selectedVendorId}
+              onChange={(e) => setSelectedVendorId(e.target.value)}
+            >
+              <option value="">Auto-match by vendor name</option>
+              {vendors.map((v) => (
+                <option key={v.id} value={v.id}>{v.name}</option>
+              ))}
+            </select>
+          </div>
+
           <div className="row between mt">
             <span className="faint" style={{ fontSize: 12 }}>{live ? 'Live model' : 'Built-in reasoner'}</span>
-            <button className="btn primary" onClick={scan} disabled={loading || !text.trim()}>{loading ? <><span className="spin" /> Scanning...</> : 'Scan contract'}</button>
+            <button className="btn primary" onClick={scan} disabled={scanDisabled}>{loading ? <><span className="spin" /> Scanning...</> : 'Scan contract'}</button>
           </div>
         </div>
 
@@ -103,7 +181,14 @@ export default function Contracts({ data, persist, live }) {
                     <h2 className="section-title" style={{ margin: 0 }}>{result.vendorName || 'Vendor'}</h2>
                     <div className="faint" style={{ fontSize: 12.5 }}>{result.category}</div>
                   </div>
-                  <span className={`badge ${result.source === 'model' ? 'ok' : 'ghost'}`}>{result.source === 'model' ? 'live model' : 'demo reasoner'}</span>
+                  <div className="row gap-sm">
+                    <span className={`badge ${result.source === 'model' ? 'ok' : 'ghost'}`}>{result.source === 'model' ? 'live model' : 'demo reasoner'}</span>
+                    {result._scannedAt && (
+                      <span className="badge ghost" style={{ fontSize: 11 }} title={result._scannedAt}>
+                        Saved {new Date(result._scannedAt).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="extract-grid mt-sm">
@@ -156,8 +241,18 @@ export default function Contracts({ data, persist, live }) {
 
               {(result.payments || []).length > 0 && (
                 <div className="card pad-lg row between">
-                  <span className="muted" style={{ fontSize: 13.5 }}>Save these {result.payments.length} payment(s) to your plan?</span>
-                  <button className="btn primary sm" onClick={addPayments} disabled={addedToPlan}>{addedToPlan ? 'Saved to plan' : '+ Save to plan'}</button>
+                  <div>
+                    <span className="muted" style={{ fontSize: 13.5 }}>Save these {result.payments.length} payment(s) to your plan?</span>
+                    {addedToPlan && result._scannedAt && (
+                      <div className="faint" style={{ fontSize: 11.5, marginTop: 4 }}>
+                        Saved {new Date(result._scannedAt).toLocaleString()}
+                        {result._vendorId && vendors.find(v => v.id === result._vendorId) && (
+                          <> · linked to {vendors.find(v => v.id === result._vendorId).name}</>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <button className="btn primary sm" onClick={addPayments} disabled={addedToPlan}>{addedToPlan ? 'Saved to plan ✓' : '+ Save to plan'}</button>
                 </div>
               )}
             </div>

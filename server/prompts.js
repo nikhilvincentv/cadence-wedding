@@ -83,3 +83,71 @@ otherwise a short human label. If a field is unknown, use an empty array or "unc
 export function contractUser(text) {
   return `Extract the structured intelligence from this contract:\n\n"""\n${text}\n"""`
 }
+
+export const COORDINATOR_SYSTEM = `You are Cadence AI Coordinator, an intelligent wedding planning assistant.
+You have access to the couple's live wedding data including vendors, timeline, budget, guests, and payments.
+
+Your role is to:
+1. Answer questions about the wedding plan thoughtfully and concisely.
+2. Identify issues, conflicts, or risks in the plan proactively.
+3. Propose concrete data changes when beneficial — presented as structured mutation proposals.
+4. Always prioritize the couple's best interests and reduce planning stress.
+
+When proposing data changes, you MUST include a JSON mutation proposal in your response wrapped in <mutation> tags:
+<mutation>
+{
+  "summary": "one sentence describing the proposed change",
+  "targetCollection": "timeline" | "vendors" | "budgetCategories" | "guests" | "payments",
+  "changes": [
+    { "field": "fieldName", "recordId": "id-of-record", "from": <currentValue>, "to": <newValue> }
+  ],
+  "rawPatch": { ... the exact state slice to merge in ... }
+}
+</mutation>
+
+Only include a mutation block when you are proposing actual data changes. For general questions and advice, respond in plain text only.
+
+Keep responses focused and conversational. Avoid excessive bullet points for simple answers.`
+
+export function coordinatorUser({ wedding, vendors, timeline, budgetCategories, guests, payments, message }) {
+  const vendorList = (vendors || [])
+    .map((v) => `- ${v.id}: ${v.name} (${v.category}, status: ${v.status || 'unknown'})`)
+    .join('\n')
+
+  const tlSummary = (timeline || [])
+    .slice(0, 20)
+    .map((t) => `- ${t.time || '?'}: ${t.title} (${t.durationMin || 0}min${t.locked ? ', locked' : ''})`)
+    .join('\n')
+
+  const budgetSummary = (budgetCategories || [])
+    .map((c) => `- ${c.name}: projected $${c.projected || 0}, actual $${c.actual || 0}`)
+    .join('\n')
+
+  const guestCount = (guests || []).length
+  const confirmedCount = (guests || []).filter((g) => g.rsvp === 'confirmed').length
+
+  const paymentList = (payments || [])
+    .filter((p) => p.status !== 'paid')
+    .map((p) => `- ${p.vendor || 'Unknown'}: $${p.amount || 0} due ${p.dueDate || 'TBD'} (${p.status || 'pending'})`)
+    .join('\n')
+
+  return `WEDDING: ${wedding?.couple || 'Unknown couple'}, date: ${wedding?.dateLabel || wedding?.date || 'TBD'}, venue: ${wedding?.venue || 'TBD'}.
+Budget: $${wedding?.budgetTotal || 0} total. Guests: ${guestCount} invited, ${confirmedCount} confirmed.
+
+VENDORS:
+${vendorList || 'No vendors yet.'}
+
+TIMELINE (first 20 events):
+${tlSummary || 'No timeline events yet.'}
+
+BUDGET CATEGORIES:
+${budgetSummary || 'No budget categories yet.'}
+
+OUTSTANDING PAYMENTS:
+${paymentList || 'No outstanding payments.'}
+
+USER MESSAGE:
+"${message}"
+
+Respond helpfully. Include a <mutation> block only if proposing concrete data changes.`
+}

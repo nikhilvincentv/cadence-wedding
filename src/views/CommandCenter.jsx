@@ -24,7 +24,7 @@ const PAY_STATUS = [
 ]
 
 export default function CommandCenter({ data, persist, status, goto, days }) {
-  const { wedding, vendors, payments } = data
+  const { wedding, vendors, payments, tasks = [] } = data
   const [modal, setModal] = useState(null)
   const [draft, setDraft] = useState({})
 
@@ -95,11 +95,19 @@ export default function CommandCenter({ data, persist, status, goto, days }) {
   const totalDue = dueSoon.reduce((s, p) => s + p.amount, 0)
 
   const alerts = []
-  dueSoon.forEach((p) => {
+  payments.forEach((p) => {
     const d = daysUntil(p.dueDate)
-    if (p.status === 'action') alerts.push({ id: p.id, level: 'warn', title: `${p.label} needs action`, detail: `${fmtMoney(p.amount)} — ${vendors.find((v) => v.id === p.vendorId)?.name || p.source}` })
-    else if (d != null && d <= 14) alerts.push({ id: p.id, level: 'warn', title: `${p.label} due in ${d} days`, detail: `${fmtMoney(p.amount)} to ${vendors.find((v) => v.id === p.vendorId)?.name || p.source}` })
+    if (p.status === 'action') {
+      alerts.push({ id: p.id, level: 'warn', title: `${p.label} needs action`, detail: `${fmtMoney(p.amount)} — ${vendors.find((v) => v.id === p.vendorId)?.name || p.source}` })
+    } else if (p.status !== 'paid' && d != null && d <= 14) {
+      alerts.push({ id: p.id, level: 'warn', title: `${p.label} due in ${d} days`, detail: `${fmtMoney(p.amount)} to ${vendors.find((v) => v.id === p.vendorId)?.name || p.source}` })
+    }
   })
+
+  function toggleTask(id) {
+    const next = tasks.map((t) => t.id === id ? { ...t, checked: !t.checked } : t)
+    persist({ ...data, tasks: next })
+  }
 
   return (
     <div className="fade-in">
@@ -138,20 +146,28 @@ export default function CommandCenter({ data, persist, status, goto, days }) {
         </div>
       </div>
 
-      <div className="grid cols-2 mt">
+      <div className="dashboard-split mt">
+        {/* Left 60% — Alerts */}
         <div className="card pad-lg">
           <div className="row between mb-sm">
             <h2 className="section-title" style={{ margin: 0 }}>What needs you</h2>
             <span className="badge warn">{alerts.length} flags</span>
           </div>
-          {alerts.length === 0 && <div className="faint" style={{ fontSize: 13, padding: '10px 0' }}>Nothing urgent. Add payments and vendors to start tracking.</div>}
+          {alerts.length === 0 && (
+            <div className="faint" style={{ fontSize: 13, padding: '10px 0' }}>
+              Nothing urgent right now. Add payments and vendors to start tracking.
+            </div>
+          )}
           {alerts.map((a) => (
-            <div className="alert-row" key={a.id}>
+            <div className="alert-row alert-row-hover" key={a.id}>
               <div className="alert-ico warn">!</div>
-              <div>
+              <div style={{ flex: 1 }}>
                 <div className="alert-title">{a.title}</div>
                 <div className="alert-detail">{a.detail}</div>
               </div>
+              <button className="btn sm alert-action-btn" onClick={() => open('payment', payments.find(p => p.id === a.id))}>
+                Review
+              </button>
             </div>
           ))}
           <div className="divider" />
@@ -161,35 +177,30 @@ export default function CommandCenter({ data, persist, status, goto, days }) {
           </div>
         </div>
 
+        {/* Right 40% — Tasks */}
         <div className="card pad-lg">
           <div className="row between mb-sm">
-            <h2 className="section-title" style={{ margin: 0 }}>Payments</h2>
-            <button className="btn sm" onClick={() => open('payment', null)}>+ Add</button>
+            <h2 className="section-title" style={{ margin: 0 }}>Daily tasks</h2>
+            <span className="badge ghost">{tasks.filter(t => t.checked).length}/{tasks.length}</span>
           </div>
-          {dueSoon.length === 0 && <div className="faint" style={{ fontSize: 13, padding: '10px 0' }}>No payments yet. Add one or scan a contract.</div>}
-          {dueSoon.map((p) => {
-            const v = vendors.find((x) => x.id === p.vendorId)
-            const d = daysUntil(p.dueDate)
-            return (
-              <div className="pay-row" key={p.id}>
-                <div className="pay-left">
-                  <span className="dot-cat" style={{ background: p.status === 'action' ? 'var(--red)' : 'var(--rose)' }} />
-                  <div>
-                    <div style={{ fontSize: 13.5, fontWeight: 600 }}>{v?.name || p.source}</div>
-                    <div className="faint" style={{ fontSize: 12 }}>{p.label}</div>
-                  </div>
-                </div>
-                <div className="row gap-sm">
-                  <div style={{ textAlign: 'right' }}>
-                    <div className="pay-amt">{fmtMoney(p.amount)}</div>
-                    <div className="faint" style={{ fontSize: 11.5 }}>{p.status === 'action' ? 'action' : d != null ? `in ${d} days` : p.dueDate || '—'}</div>
-                  </div>
-                  <button className="icon-btn" title="Edit" onClick={() => open('payment', p)}>edit</button>
-                  <button className="icon-btn" title="Delete" onClick={() => removePayment(p.id)}>del</button>
-                </div>
-              </div>
-            )
-          })}
+          {tasks.length === 0 && (
+            <div className="faint" style={{ fontSize: 13, padding: '10px 0' }}>
+              No tasks yet. Tasks added here will help you stay on track each day.
+            </div>
+          )}
+          {tasks.map((t) => (
+            <label key={t.id} className="task-row">
+              <input
+                type="checkbox"
+                checked={!!t.checked}
+                onChange={() => toggleTask(t.id)}
+                className="task-check"
+              />
+              <span style={{ textDecoration: t.checked ? 'line-through' : 'none', color: t.checked ? 'var(--ink-faint)' : 'var(--ink)' }}>
+                {t.description}
+              </span>
+            </label>
+          ))}
         </div>
       </div>
 
