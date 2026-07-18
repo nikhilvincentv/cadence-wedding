@@ -114,6 +114,26 @@ export default function CommandCenter({ data, persist, status, goto, days }) {
         </div>
       </div>
 
+      {data.profile && (
+        <div className="card pad-lg mt">
+          <div className="row between wrap" style={{ gap: 14 }}>
+            <div>
+              <div className="faint" style={{ fontSize: 11.5, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 8 }}>Your priorities</div>
+              <div className="row wrap gap-sm">
+                {(data.profile.priorities || []).length
+                  ? data.profile.priorities.map((p) => <span key={p} className="badge ok">{p}</span>)
+                  : <span className="faint" style={{ fontSize: 13 }}>None set</span>}
+                {data.profile.style && <span className="badge low">{data.profile.style}</span>}
+                {data.profile.stage && <span className="badge ghost">{data.profile.stage}</span>}
+              </div>
+            </div>
+            <div className="faint" style={{ fontSize: 12, maxWidth: 300, textAlign: 'right' }}>
+              Cadence weighs these when the AI reasons about your day.
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid cols-2 mt">
         <div className="card pad-lg">
           <div className="row between mb-sm">

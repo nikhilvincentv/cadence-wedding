@@ -63,7 +63,7 @@ export default function TimelineView({ data, persist, live }) {
     setLoading(true)
     setResult(null)
     try {
-      setResult(await runCascade({ change, timeline, vendors, wedding }))
+      setResult(await runCascade({ change, timeline, vendors, wedding, profile: data.profile }))
     } catch (e) {
       setResult({ error: String(e.message || e) })
     } finally {
