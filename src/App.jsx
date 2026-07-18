@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { UserButton } from '@clerk/clerk-react'
 import { getStatus, getWedding, daysUntil } from './api.js'
 import CommandCenter from './views/CommandCenter.jsx'
 import TimelineView from './views/TimelineView.jsx'
@@ -58,8 +59,11 @@ export default function App() {
             <span className="dot" />
             {live ? `Live · ${status.model}` : 'Demo mode · built-in reasoner'}
           </div>
-          <div className="faint" style={{ fontSize: 11, marginTop: 10, lineHeight: 1.5 }}>
-            {state.wedding.couple} · {days} days out
+          <div className="row between" style={{ marginTop: 12 }}>
+            <div className="faint" style={{ fontSize: 11, lineHeight: 1.5 }}>
+              {state.wedding.couple} · {days} days out
+            </div>
+            <UserButton afterSignOutUrl="/" />
           </div>
         </div>
       </aside>
