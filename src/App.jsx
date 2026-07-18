@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { UserButton, useUser } from '@clerk/clerk-react'
+import { useUser, useClerk } from '@clerk/clerk-react'
 import { getStatus, getState, saveState, daysUntil } from './api.js'
 import CommandCenter from './views/CommandCenter.jsx'
 import TimelineView from './views/TimelineView.jsx'
@@ -13,6 +13,7 @@ const NAV = [
 
 export default function App() {
   const { isLoaded, user } = useUser()
+  const { signOut } = useClerk()
   const userId = user?.id
   const [view, setView] = useState('home')
   const [status, setStatus] = useState(null)
@@ -69,10 +70,10 @@ export default function App() {
             {data.persisted ? 'Saved to your account' : 'Not saved (offline)'}
           </div>
           <div className="row between" style={{ marginTop: 12 }}>
-            <div className="faint" style={{ fontSize: 11, lineHeight: 1.5 }}>
-              {data.wedding.couple ? `${data.wedding.couple}${days != null ? ` · ${days} days out` : ''}` : 'No wedding yet'}
+            <div className="faint" style={{ fontSize: 11, lineHeight: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {user?.primaryEmailAddress?.emailAddress || data.wedding.couple || 'Signed in'}
             </div>
-            <UserButton afterSignOutUrl="/" />
+            <button className="icon-btn" onClick={() => signOut()}>Sign out</button>
           </div>
         </div>
       </aside>
