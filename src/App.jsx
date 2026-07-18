@@ -6,6 +6,7 @@ import TimelineView from './views/TimelineView.jsx'
 import Contracts from './views/Contracts.jsx'
 import Budget from './views/Budget.jsx'
 import Guests from './views/Guests.jsx'
+import AICoordinator from './views/AICoordinator.jsx'
 import Vendors from './views/Vendors.jsx'
 
 const NAV = [
@@ -118,7 +119,7 @@ export default function App() {
           <div className="view-placeholder">Inbox — coming soon</div>
         )}
         {view === 'ai' && (
-          <div className="view-placeholder">AI Coordinator — coming soon</div>
+          <AICoordinator data={data} persist={persist} status={status} />
         )}
       </main>
     </div>
