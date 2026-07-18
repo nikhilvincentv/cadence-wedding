@@ -1,24 +1,38 @@
+import { fullState } from '../server/data.js'
+import { cascadeFallback, contractFallback } from '../server/fallback.js'
+
 const j = (r) => {
   if (!r.ok) throw new Error(`Request failed: ${r.status}`)
   return r.json()
 }
 
-export const getStatus = () => fetch('/api/status').then(j)
-export const getWedding = () => fetch('/api/wedding').then(j)
+export const getStatus = () =>
+  fetch('/api/status')
+    .then(j)
+    .catch(() => ({ enabled: false, model: 'demo-reasoner (offline)', provider: 'built-in' }))
+
+export const getWedding = () =>
+  fetch('/api/wedding')
+    .then(j)
+    .catch(() => fullState())
 
 export const runCascade = (body) =>
   fetch('/api/cascade', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-  }).then(j)
+  })
+    .then(j)
+    .catch(() => ({ ...cascadeFallback(body.change), source: 'demo' }))
 
 export const extractContract = (text) =>
   fetch('/api/contract', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text }),
-  }).then(j)
+  })
+    .then(j)
+    .catch(() => ({ ...contractFallback(text), source: 'demo' }))
 
 export const fmtMoney = (n) =>
   '$' + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })
