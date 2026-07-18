@@ -11,10 +11,19 @@ export const getStatus = () =>
     .then(j)
     .catch(() => ({ enabled: false, model: 'demo-reasoner (offline)', provider: 'built-in' }))
 
-export const getWedding = () =>
-  fetch('/api/wedding')
+export const getState = (userId) =>
+  fetch('/api/state', { headers: { 'x-user-id': userId || 'demo-user' } })
     .then(j)
-    .catch(() => fullState())
+    .catch(() => ({ ...fullState(), persisted: false }))
+
+export const saveState = (userId, data) =>
+  fetch('/api/state', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-user-id': userId || 'demo-user' },
+    body: JSON.stringify(data),
+  })
+    .then(j)
+    .catch(() => ({ ok: false }))
 
 export const runCascade = (body) =>
   fetch('/api/cascade', {
