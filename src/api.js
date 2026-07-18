@@ -47,7 +47,10 @@ export const fmtMoney = (n) =>
   '$' + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })
 
 export const daysUntil = (dateStr) => {
+  if (!dateStr) return null
   const d = new Date(dateStr + 'T00:00:00')
-  const now = new Date('2026-07-17T00:00:00')
+  if (isNaN(d)) return null
+  const now = new Date()
+  now.setHours(0, 0, 0, 0)
   return Math.round((d - now) / 86400000)
 }
