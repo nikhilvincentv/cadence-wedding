@@ -12,7 +12,7 @@ function GoogleMark() {
   )
 }
 
-export default function LoginScreen() {
+export default function LoginScreen({ onSkip }) {
   const { isLoaded: siLoaded, signIn, setActive: setActiveSignIn } = useSignIn()
   const { isLoaded: suLoaded, signUp, setActive: setActiveSignUp } = useSignUp()
 
@@ -111,6 +111,11 @@ export default function LoginScreen() {
       </div>
 
       <div className="auth-card">
+        {onSkip && (
+          <button type="button" className="auth-link-btn" onClick={onSkip} style={{ marginBottom: 12 }}>
+            Skip login (dev mode)
+          </button>
+        )}
         {mode === 'verify' ? (
           <form onSubmit={doVerify}>
             <h2 className="auth-title">Check your email</h2>
