@@ -38,13 +38,7 @@ export async function getUserState(userId) {
 export async function saveUserState(userId, data) {
   if (!sql) return { ok: false, reason: 'no database configured' }
   await ensureSchema()
-  const clean = {
-    wedding: data.wedding,
-    vendors: data.vendors,
-    timeline: data.timeline,
-    payments: data.payments,
-    alerts: data.alerts,
-  }
+  const { sampleContracts: _s, persisted: _p, ...clean } = data
   await sql`INSERT INTO user_weddings (user_id, data, updated_at)
     VALUES (${userId}, ${JSON.stringify(clean)}::jsonb, now())
     ON CONFLICT (user_id) DO UPDATE SET data = ${JSON.stringify(clean)}::jsonb, updated_at = now()`

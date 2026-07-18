@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { fmtMoney, daysUntil } from '../api.js'
 import { Modal, Field, SelectField } from '../components/Modal.jsx'
+import Questionnaire from './Questionnaire.jsx'
 
 const uid = () => Math.random().toString(36).slice(2, 9)
 
@@ -61,32 +62,7 @@ export default function CommandCenter({ data, persist, status, goto, days }) {
   }
 
   if (isNewAccount) {
-    return (
-      <div className="fade-in">
-        <div className="topbar">
-          <div>
-            <div className="eyebrow">Welcome to Cadence</div>
-            <h1 className="page">Let's set up your wedding</h1>
-            <div className="page-sub">Start with the basics. You can add vendors, payments, and your day-of timeline next.</div>
-          </div>
-        </div>
-        <div className="card pad-lg" style={{ maxWidth: 620 }}>
-          <div className="setup-grid">
-            <Field label="Couple" placeholder="e.g. Alex & Sam" value={draft.couple || ''} onChange={(e) => set('couple', e.target.value)} />
-            <Field label="Wedding date" type="date" value={draft.date || ''} onChange={(e) => set('date', e.target.value)} />
-            <Field label="Venue" placeholder="Venue · City, State" value={draft.venue || ''} onChange={(e) => set('venue', e.target.value)} />
-            <Field label="Guest count" type="number" value={draft.guestCount || ''} onChange={(e) => set('guestCount', Number(e.target.value))} />
-            <Field label="Total budget ($)" type="number" value={draft.budgetTotal || ''} onChange={(e) => set('budgetTotal', Number(e.target.value))} />
-            <Field label="Sunset time (optional)" placeholder="e.g. 7:24 PM" value={draft.sunset || ''} onChange={(e) => set('sunset', e.target.value)} />
-          </div>
-          <div className="mt">
-            <button className="btn primary" disabled={!draft.couple} onClick={() => { persist({ ...data, wedding: { ...wedding, ...draft, budgetSpent: 0, dateLabel: dateLabelFrom(draft.date) } }) }}>
-              Create my wedding
-            </button>
-          </div>
-        </div>
-      </div>
-    )
+    return <Questionnaire data={data} persist={persist} />
   }
 
   const remaining = (wedding.budgetTotal || 0) - (wedding.budgetSpent || 0)

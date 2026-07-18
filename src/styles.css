@@ -287,6 +287,17 @@ select.field { appearance: none; }
 .modal-x:hover { color: var(--ink); }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
 
+.quiz-card { max-width: 620px; }
+.quiz-progress { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
+.quiz-dot { width: 26px; height: 5px; border-radius: 3px; background: var(--bg-3); }
+.quiz-dot.on { background: linear-gradient(90deg, var(--rose), var(--gold)); }
+.quiz-count { margin-left: auto; font-size: 12px; color: var(--ink-faint); }
+.quiz-title { font-family: var(--serif); font-size: 26px; font-weight: 600; }
+.quiz-desc { color: var(--ink-dim); font-size: 14px; margin: 6px 0 22px; }
+.quiz-body { display: flex; flex-direction: column; gap: 6px; min-height: 150px; }
+.quiz-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 26px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 9px; }
+
 .vendor-card { padding: 14px; border: 1px solid var(--line-soft); border-radius: 12px; background: var(--bg); }
 .icon-btn { background: none; border: 1px solid var(--line); color: var(--ink-dim); font-size: 11px; padding: 3px 8px; border-radius: 7px; cursor: pointer; font-family: var(--sans); }
 .icon-btn:hover { color: var(--ink); border-color: var(--ink-faint); }
