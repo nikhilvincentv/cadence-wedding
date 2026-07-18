@@ -1,48 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { searchInspiration } from '../api.js'
+import { curatedFeed, CURATED_TOTAL } from '../placeholders.js'
 
 const uid = () => Math.random().toString(36).slice(2, 9)
-
-// Preset categories used to fill an endless Pinterest-style feed — no search box needed.
-const CATEGORIES = [
-  'wedding venue', 'outdoor wedding ceremony', 'wedding reception decor', 'floral centerpieces',
-  'bridal bouquet', 'wedding cake', 'reception lighting', 'wedding dress', 'wedding rings',
-  'boho wedding', 'garden wedding venue', 'barn wedding venue', 'beach wedding', 'wedding arch',
-  'table settings wedding', 'wedding invitation design',
-]
+const PAGE_SIZE = 24
 
 export default function Inspiration({ data, persist }) {
   const board = data.inspirationBoard || []
-  const [feed, setFeed] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const catIndex = useRef(0)
-  const seenUrls = useRef(new Set())
+  const [feed, setFeed] = useState(() => curatedFeed(0, PAGE_SIZE))
   const sentinelRef = useRef(null)
-  const loadingRef = useRef(false)
 
-  async function loadMore(batchSize = 1) {
-    if (loadingRef.current || catIndex.current >= CATEGORIES.length) return
-    loadingRef.current = true
-    setLoading(true)
-    const batch = CATEGORIES.slice(catIndex.current, catIndex.current + batchSize)
-    catIndex.current += batch.length
-    const responses = await Promise.all(batch.map((category) => searchInspiration(category)))
-    if (responses.every((r) => r.error) && feed.length === 0) setError(responses[0].error)
-    else {
-      const fresh = responses
-        .flatMap((r) => r.results || [])
-        .filter((img) => !seenUrls.current.has(img.url))
-      fresh.forEach((img) => seenUrls.current.add(img.url))
-      setFeed((prev) => [...prev, ...fresh])
-    }
-    setLoading(false)
-    loadingRef.current = false
+  function loadMore() {
+    setFeed((prev) => {
+      if (prev.length >= CURATED_TOTAL) return prev
+      return [...prev, ...curatedFeed(prev.length, PAGE_SIZE)]
+    })
   }
-
-  useEffect(() => {
-    loadMore(2)
-  }, [])
 
   useEffect(() => {
     const el = sentinelRef.current
@@ -100,10 +72,6 @@ export default function Inspiration({ data, persist }) {
       <div className="mt-lg">
         <h2 className="section-title" style={{ margin: '0 0 10px' }}>Explore</h2>
 
-        {error && feed.length === 0 && (
-          <div className="card pad-lg mb-sm"><span className="badge high">heads up</span> <span className="muted">{error}</span></div>
-        )}
-
         <div className="inspo-grid">
           {feed.map((img) => {
             const added = savedUrls.has(img.url)
@@ -122,12 +90,7 @@ export default function Inspiration({ data, persist }) {
         </div>
 
         <div ref={sentinelRef} style={{ height: 1 }} />
-        {loading && (
-          <div className="row" style={{ justifyContent: 'center', padding: '24px 0' }}>
-            <span className="spin" /> <span className="muted">Loading more inspiration...</span>
-          </div>
-        )}
-        {!loading && catIndex.current >= CATEGORIES.length && (
+        {feed.length >= CURATED_TOTAL && (
           <div className="row" style={{ justifyContent: 'center', padding: '24px 0' }}>
             <span className="faint" style={{ fontSize: 12 }}>You've reached the end of the feed.</span>
           </div>

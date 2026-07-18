@@ -11,7 +11,6 @@ import { cascadeFallback, contractFallback, seatingFallback, emailFallback, plan
 import { getUserState, saveUserState } from './db.js'
 import { reindexUser, searchUser, buildDocs, typesenseEnabled } from './typesense.js'
 import { findNearby } from './places.js'
-import { searchImages } from './images.js'
 
 const app = express()
 app.use(cors())
@@ -75,17 +74,6 @@ app.get('/api/places', async (req, res) => {
     res.json(await findNearby(String(venue)))
   } catch (err) {
     res.status(200).json({ error: 'Map service is busy right now. Try again in a moment.', detail: String(err.message || err) })
-  }
-})
-
-app.get('/api/images', async (req, res) => {
-  const q = req.query.q
-  const page = Number(req.query.page) || 1
-  if (!q) return res.status(400).json({ error: 'Missing search query.' })
-  try {
-    res.json(await searchImages(String(q), page))
-  } catch (err) {
-    res.status(200).json({ error: 'Image search is busy right now. Try again in a moment.', detail: String(err.message || err), results: [] })
   }
 })
 
