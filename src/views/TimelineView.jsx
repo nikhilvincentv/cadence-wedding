@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { runCascade } from '../api.js'
 import { Modal, Field, SelectField } from '../components/Modal.jsx'
+import { downloadIcs, googleCalUrl } from '../utils/calendar.js'
 
 const uid = () => Math.random().toString(36).slice(2, 9)
 
@@ -92,6 +93,14 @@ export default function TimelineView({ data, persist, live }) {
           <h1 className="page">The day, and everything it touches</h1>
           <div className="page-sub">Build your day-of timeline, then change one thing and let Cadence trace the ripple.</div>
         </div>
+        <button
+          className="btn sm"
+          onClick={() => downloadIcs(wedding, timeline)}
+          disabled={!wedding?.date || timeline.length === 0}
+          title={!wedding?.date ? 'Set your wedding date first' : 'Download .ics for Google/Apple/Outlook Calendar'}
+        >
+          ⬇ Sync to calendar (.ics)
+        </button>
       </div>
 
       <div className="grid" style={{ gridTemplateColumns: '0.9fr 1.1fr', gap: 20 }}>
@@ -118,6 +127,7 @@ export default function TimelineView({ data, persist, live }) {
                       <span className="faint mono" style={{ fontSize: 11 }}>{t.durationMin}m</span>
                       <button className="icon-btn" onClick={() => openAdd(t)}>edit</button>
                       <button className="icon-btn" onClick={() => removeEvent(t.id)}>del</button>
+                      {wedding?.date && <a className="icon-btn" href={googleCalUrl(wedding, t)} target="_blank" rel="noreferrer" title="Add to Google Calendar">+ cal</a>}
                     </div>
                     {t.note && <div className="tl-note">{t.note}</div>}
                   </div>

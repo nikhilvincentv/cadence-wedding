@@ -34,6 +34,15 @@ export const runCascade = (body) =>
     .then(j)
     .catch(() => ({ ...cascadeFallback(body.change), source: 'demo' }))
 
+export const scanEmail = (email) =>
+  fetch('/api/email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+    .then(j)
+    .catch(() => ({ error: 'Could not scan email.' }))
+
 export const findNearbyVendors = (venue) =>
   fetch(`/api/places?venue=${encodeURIComponent(venue)}`)
     .then(j)

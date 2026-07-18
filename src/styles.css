@@ -902,3 +902,8 @@ select.field { appearance: none; }
 .nearby-name { font-size: 13.5px; font-weight: 600; }
 .nearby-link { color: var(--cyan); text-decoration: none; }
 .nearby-link:hover { text-decoration: underline; }
+
+.email-body { font-size: 12.5px; color: var(--ink-dim); line-height: 1.6; white-space: pre-wrap; margin-top: 12px; padding: 12px 14px; background: var(--bg); border: 1px solid var(--line-soft); border-radius: 10px; max-height: 130px; overflow-y: auto; }
+.email-extract { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line-soft); }
+.extract-line { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--ink-dim); padding: 5px 0; }
+a.icon-btn { text-decoration: none; display: inline-flex; align-items: center; }

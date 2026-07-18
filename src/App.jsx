@@ -11,6 +11,7 @@ import Vendors from './views/Vendors.jsx'
 import Seating from './views/Seating.jsx'
 import SearchPalette from './components/SearchPalette.jsx'
 import Venue from './views/Venue.jsx'
+import Inbox from './views/Inbox.jsx'
 
 const NAV = [
   { id: 'home',        label: 'Dashboard',       icon: '⌂' },
@@ -140,7 +141,7 @@ export default function App() {
           <div className="view-placeholder">Inspiration — coming soon</div>
         )}
         {view === 'inbox' && (
-          <div className="view-placeholder">Inbox — coming soon</div>
+          <Inbox data={data} persist={persist} live={live} />
         )}
         {view === 'ai' && (
           <AICoordinator data={data} persist={persist} status={status} />

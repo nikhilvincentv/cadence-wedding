@@ -176,6 +176,31 @@ Respond ONLY with strict JSON:
 }
 guestId must be one of the provided guest ids. tableId must be one of the provided table ids, or null if unassigned.`
 
+export const EMAIL_SYSTEM = `You are Cadence's inbox intelligence. You read a wedding vendor email
+and pull out what the couple needs to act on.
+
+Respond ONLY with strict JSON:
+{
+  "summary": "one sentence on what this email is about",
+  "vendorName": "the vendor / sender business, or ''",
+  "payments": [ { "label": "Final balance", "amount": 9200, "dueDate": "2026-08-29" } ],
+  "dateChanges": [ { "what": "Engagement session", "from": "Aug 22", "to": "Aug 23 5:30 PM" } ],
+  "deadlines": [ { "what": "Lock final headcount", "date": "2026-09-02" } ],
+  "actionItems": [ "short thing the couple must do" ]
+}
+Amounts are numbers. Dates YYYY-MM-DD when a calendar date is given, else a short label.
+Use empty arrays when nothing applies.`
+
+export function emailUser(email) {
+  return `FROM: ${email.from}
+SUBJECT: ${email.subject}
+DATE: ${email.date}
+
+${email.body}
+
+Extract the structured intelligence and respond with the JSON described in your instructions.`
+}
+
 export function seatingUser({ guests, tables, notes }) {
   const guestList = guests
     .map((g) => `- ${g.id}: ${g.name} (${g.relationship || 'guest'}, rsvp: ${g.rsvp || 'awaiting'}${g.notes ? `, note: ${g.notes}` : ''})`)

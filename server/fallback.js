@@ -193,6 +193,39 @@ export function contractFallback(text = '') {
   return { vendorName, category, payments, hiddenFees, gratuityIncluded, cancellation, keyDates, watchOuts }
 }
 
+export function emailFallback(email = {}) {
+  const t = `${email.subject || ''} ${email.body || ''}`
+  const payments = []
+  const money = t.match(/\$([\d,]{2,})/g) || []
+  const amounts = money.map((m) => Number(m.replace(/[^0-9]/g, '')))
+  if (/final balance/i.test(t) && amounts.includes(9200)) payments.push({ label: 'Final balance', amount: 9200, dueDate: '2026-08-29' })
+  if (/installment/i.test(t) && amounts.includes(1800)) payments.push({ label: 'Final installment', amount: 1800, dueDate: '2026-08-15' })
+  if (/deposit/i.test(t) && amounts.includes(650)) payments.push({ label: 'Deposit', amount: 650, dueDate: '2026-08-20' })
+  if (/remaining balance/i.test(t) && amounts.includes(750)) payments.push({ label: 'Remaining balance', amount: 750, dueDate: '2026-08-22' })
+
+  const dateChanges = []
+  if (/reschedul|move your|no longer do/i.test(t)) dateChanges.push({ what: 'Engagement session', from: 'Aug 22', to: 'Aug 23 5:30 PM' })
+
+  const deadlines = []
+  if (/headcount/i.test(t)) deadlines.push({ what: 'Lock final headcount', date: '2026-09-02' })
+  if (/song list|must-play/i.test(t)) deadlines.push({ what: 'Send song lists', date: '2026-09-05' })
+
+  const actionItems = []
+  if (payments.length) actionItems.push(`Pay ${payments[0].label.toLowerCase()} by ${payments[0].dueDate}`)
+  if (dateChanges.length) actionItems.push('Confirm the new date')
+  if (deadlines.length) actionItems.push(deadlines[0].what)
+  if (actionItems.length === 0) actionItems.push('Reply to the vendor')
+
+  return {
+    summary: email.subject ? `${email.subject} from ${email.from || 'a vendor'}.` : 'Vendor email.',
+    vendorName: (email.from || '').split('·').pop()?.trim() || email.from || '',
+    payments,
+    dateChanges,
+    deadlines,
+    actionItems,
+  }
+}
+
 export function seatingFallback({ guests = [], tables = [] }) {
   const order = { family: 0, friends: 1, coworkers: 2, other: 3 }
   const sorted = [...guests].sort((a, b) => (order[a.relationship] ?? 9) - (order[b.relationship] ?? 9))
