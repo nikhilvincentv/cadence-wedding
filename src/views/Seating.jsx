@@ -89,7 +89,6 @@ export default function Seating({ data, persist, live }) {
     <div className="fade-in">
       <div className="topbar">
         <div>
-          <div className="eyebrow">Seating Chart</div>
           <h1 className="page">Seat everyone in seconds</h1>
           <div className="page-sub">Add your tables, then let AI arrange {seatable.length} guests — keeping families and friends together. Drag to fine-tune.</div>
         </div>

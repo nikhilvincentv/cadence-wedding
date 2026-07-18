@@ -111,7 +111,6 @@ export default function Contracts({ data, persist, live }) {
     <div className="fade-in">
       <div className="topbar">
         <div>
-          <div className="eyebrow">Contract Intelligence</div>
           <h1 className="page">Stop reading the fine print</h1>
           <div className="page-sub">Paste any vendor contract. Cadence pulls the deadlines, hidden fees, and traps - and saves them to your plan.</div>
         </div>

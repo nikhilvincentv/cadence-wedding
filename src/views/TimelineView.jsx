@@ -89,7 +89,6 @@ export default function TimelineView({ data, persist, live }) {
     <div className="fade-in">
       <div className="topbar">
         <div>
-          <div className="eyebrow">Timeline & Cascade Engine</div>
           <h1 className="page">The day, and everything it touches</h1>
           <div className="page-sub">Build your day-of timeline, then change one thing and let Cadence trace the ripple.</div>
         </div>

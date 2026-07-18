@@ -39,7 +39,6 @@ export default function Inbox({ data, persist, live }) {
     <div className="fade-in">
       <div className="topbar">
         <div>
-          <div className="eyebrow">Inbox Intelligence</div>
           <h1 className="page">Your inbox, sorted by the AI</h1>
           <div className="page-sub">Cadence reads vendor emails and pulls out payments, date changes, and deadlines automatically.</div>
         </div>

@@ -89,7 +89,6 @@ export default function CommandCenter({ data, persist, status, goto, days }) {
     <div className="fade-in">
       <div className="topbar">
         <div>
-          <div className="eyebrow">Command Center</div>
           <h1 className="page">{wedding.couple}</h1>
           <div className="page-sub">
             {wedding.dateLabel || 'Date not set'}{wedding.venue ? ` · ${wedding.venue}` : ''}{wedding.guestCount ? ` · ${wedding.guestCount} guests` : ''}

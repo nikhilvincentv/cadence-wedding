@@ -55,7 +55,6 @@ export default function Venue({ data, persist }) {
     <div className="fade-in">
       <div className="topbar">
         <div>
-          <div className="eyebrow">Venue & Nearby</div>
           <h1 className="page">Real vendors near your venue</h1>
           <div className="page-sub">{venue ? `Around ${venue}` : 'Set your venue first (Dashboard → Edit wedding).'} · Live data from OpenStreetMap.</div>
         </div>
