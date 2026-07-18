@@ -135,7 +135,6 @@ export default function Vendors({ data, persist, setView }) {
       {/* Header */}
       <div className="topbar">
         <div>
-          <div className="eyebrow">Vendor Directory</div>
           <h1 className="page">Your vendors</h1>
           <div className="page-sub">
             Click any vendor card to open their full profile with contract, emails, timeline, and tasks.

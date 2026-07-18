@@ -1,5 +1,5 @@
 import { neon } from '@neondatabase/serverless'
-import { emptyState, sampleContracts } from './data.js'
+import { emptyState, sampleContracts, sampleEmails } from './data.js'
 
 const url = process.env.DATABASE_URL
 const sql = url ? neon(url) : null
@@ -23,7 +23,7 @@ async function ensureSchema() {
 }
 
 export async function getUserState(userId) {
-  if (!sql) return { ...emptyState(), sampleContracts, profile: null, persisted: false }
+  if (!sql) return { ...emptyState(), sampleContracts, sampleEmails, profile: null, persisted: false }
   await ensureSchema()
   const [wRows, pRows] = await Promise.all([
     sql`SELECT data FROM user_weddings WHERE user_id = ${userId}`,
@@ -35,15 +35,15 @@ export async function getUserState(userId) {
     await sql`INSERT INTO user_weddings (user_id, data)
       VALUES (${userId}, ${JSON.stringify(seed)}::jsonb)
       ON CONFLICT (user_id) DO NOTHING`
-    return { ...seed, sampleContracts, profile, persisted: true }
+    return { ...seed, sampleContracts, sampleEmails, profile, persisted: true }
   }
-  return { ...wRows[0].data, sampleContracts, profile, persisted: true }
+  return { ...wRows[0].data, sampleContracts, sampleEmails, profile, persisted: true }
 }
 
 export async function saveUserState(userId, data) {
   if (!sql) return { ok: false, reason: 'no database configured' }
   await ensureSchema()
-  const { sampleContracts: _s, persisted: _p, profile, ...rest } = data
+  const { sampleContracts: _s, sampleEmails: _e, persisted: _p, profile, ...rest } = data
   await sql`INSERT INTO user_weddings (user_id, data, updated_at)
     VALUES (${userId}, ${JSON.stringify(rest)}::jsonb, now())
     ON CONFLICT (user_id) DO UPDATE SET data = ${JSON.stringify(rest)}::jsonb, updated_at = now()`

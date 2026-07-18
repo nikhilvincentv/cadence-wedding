@@ -193,7 +193,6 @@ export default function Guests({ data, persist }) {
       {/* ── Header ──────────────────────────────────────────────── */}
       <div className="topbar">
         <div>
-          <div className="eyebrow">Guest Management</div>
           <h1 className="page">Your guest list</h1>
           <div className="page-sub">
             Track RSVPs, meals, gifts, lodging, and transport for every guest.

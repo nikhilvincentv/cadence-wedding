@@ -9,6 +9,10 @@ import Budget from './views/Budget.jsx'
 import Guests from './views/Guests.jsx'
 import AICoordinator from './views/AICoordinator.jsx'
 import Vendors from './views/Vendors.jsx'
+import Seating from './views/Seating.jsx'
+import SearchPalette from './components/SearchPalette.jsx'
+import Venue from './views/Venue.jsx'
+import Inbox from './views/Inbox.jsx'
 
 const NAV = [
   { id: 'home',        label: 'Dashboard',       icon: '⌂' },
@@ -18,6 +22,7 @@ const NAV = [
   { id: 'vendors',     label: 'Vendors',          icon: '◈' },
   { id: 'contracts',   label: 'Contracts',        icon: '✦' },
   { id: 'seating',     label: 'Seating',          icon: '⊞' },
+  { id: 'venue',       label: 'Venue & Nearby',   icon: '⌖' },
   { id: 'inspiration', label: 'Inspiration',      icon: '✧' },
   { id: 'inbox',       label: 'Inbox',            icon: '✉' },
   { id: 'ai',          label: 'AI Coordinator',   icon: '◉' },
@@ -30,13 +35,27 @@ export default function App() {
   const [view, setView] = useState('home')
   const [status, setStatus] = useState(null)
   const [data, setData] = useState(null)
+  const [searchOpen, setSearchOpen] = useState(false)
 
   useEffect(() => {
     getStatus().then(setStatus).catch(() => setStatus({ enabled: false, model: 'demo', provider: 'built-in' }))
   }, [])
 
+  // Listen for ⌘K / Ctrl+K global search palette trigger
   useEffect(() => {
-    if (!isLoaded) return
+    const onKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setSearchOpen(true)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
+  // Fetch wedding state once authentication details are fully loaded
+  useEffect(() => {
+    if (!isLoaded || !userId) return
     getState(userId).then(setData)
   }, [isLoaded, userId])
 
@@ -71,6 +90,11 @@ export default function App() {
             <div className="brand-name">Cadence</div>
             <div className="brand-sub">Wedding OS</div>
           </div>
+        </div>
+        <div className="nav-item search-trigger" onClick={() => setSearchOpen(true)}>
+          <span className="nav-ico">⌕</span>
+          Search
+          <span className="kbd-hint">⌘K</span>
         </div>
         {NAV.map((n) => (
           <div key={n.id} className={`nav-item ${view === n.id ? 'active' : ''}`} onClick={() => setView(n.id)}>
@@ -126,18 +150,25 @@ export default function App() {
           <Vendors data={data} persist={persist} setView={setView} />
         )}
         {view === 'seating' && (
-          <div className="view-placeholder">Seating — coming soon</div>
+          <Seating data={data} persist={persist} live={live} />
+        )}
+        {view === 'venue' && (
+          <Venue data={data} persist={persist} />
         )}
         {view === 'inspiration' && (
           <div className="view-placeholder">Inspiration — coming soon</div>
         )}
         {view === 'inbox' && (
-          <div className="view-placeholder">Inbox — coming soon</div>
+          <Inbox data={data} persist={persist} live={live} />
         )}
         {view === 'ai' && (
           <AICoordinator data={data} persist={persist} status={status} />
         )}
       </main>
+
+      {searchOpen && (
+        <SearchPalette userId={userId} data={data} goto={setView} onClose={() => setSearchOpen(false)} />
+      )}
     </div>
   )
 }

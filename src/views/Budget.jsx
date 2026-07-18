@@ -101,7 +101,6 @@ export default function Budget({ data, persist }) {
       {/* ── Header ─────────────────────────────────────────────── */}
       <div className="topbar">
         <div>
-          <div className="eyebrow">Budget Analytics</div>
           <h1 className="page">Where your money goes</h1>
           <div className="page-sub">
             Track projected vs. actual spend per category. Catch overruns before they surprise you.

@@ -50,7 +50,6 @@ export default function Questionnaire({ data, persist }) {
     <div className="fade-in">
       <div className="topbar">
         <div>
-          <div className="eyebrow">Welcome to Cadence</div>
           <h1 className="page">Let's set up your wedding</h1>
           <div className="page-sub">A few quick questions. Everything saves to your account as you go.</div>
         </div>

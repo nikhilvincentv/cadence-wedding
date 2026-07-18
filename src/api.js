@@ -34,6 +34,41 @@ export const runCascade = (body) =>
     .then(j)
     .catch(() => ({ ...cascadeFallback(body.change), source: 'demo' }))
 
+export const scanEmail = (email) =>
+  fetch('/api/email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  })
+    .then(j)
+    .catch(() => ({ error: 'Could not scan email.' }))
+
+export const findNearbyVendors = (venue) =>
+  fetch(`/api/places?venue=${encodeURIComponent(venue)}`)
+    .then(j)
+    .catch(() => ({ error: 'Could not reach the map service.' }))
+
+export const reindexSearch = (userId, data) =>
+  fetch('/api/search', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-user-id': userId || 'demo-user' },
+    body: JSON.stringify({ data }),
+  })
+    .then(j)
+    .catch(() => ({ enabled: false }))
+
+export const searchQuery = (userId, q) =>
+  fetch(`/api/search?q=${encodeURIComponent(q)}`, { headers: { 'x-user-id': userId || 'demo-user' } })
+    .then(j)
+    .catch(() => ({ enabled: false, hits: [] }))
+
+export const runSeating = (body) =>
+  fetch('/api/seating', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }).then(j)
+
 export const extractContract = (text) =>
   fetch('/api/contract', {
     method: 'POST',
