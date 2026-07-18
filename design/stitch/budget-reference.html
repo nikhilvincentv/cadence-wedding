@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Budget & Analysis | Aisle Wedding Planning</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@100..900&family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#f4f3f1",
+                    "surface-container-highest": "#e3e2e0",
+                    "on-secondary": "#ffffff",
+                    "tertiary": "#675d4e",
+                    "secondary-fixed": "#d9e6d2",
+                    "on-error-container": "#93000a",
+                    "on-primary-fixed-variant": "#613d3d",
+                    "on-tertiary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed-dim": "#bdcab7",
+                    "on-surface": "#1a1c1a",
+                    "on-secondary-container": "#586454",
+                    "surface-tint": "#7c5454",
+                    "on-tertiary-container": "#4a4133",
+                    "tertiary-container": "#baad9c",
+                    "on-tertiary-fixed-variant": "#4f4538",
+                    "primary-fixed-dim": "#edbaba",
+                    "inverse-on-surface": "#f2f1ee",
+                    "primary": "#7c5454",
+                    "inverse-surface": "#2f312f",
+                    "on-secondary-fixed": "#141e12",
+                    "surface-bright": "#faf9f6",
+                    "on-surface-variant": "#504444",
+                    "on-error": "#ffffff",
+                    "surface-container-high": "#e9e8e5",
+                    "on-primary-fixed": "#2f1314",
+                    "error": "#ba1a1a",
+                    "surface-container": "#efeeeb",
+                    "surface": "#faf9f6",
+                    "surface-variant": "#e3e2e0",
+                    "tertiary-fixed-dim": "#d2c4b2",
+                    "surface-dim": "#dbdad7",
+                    "on-background": "#1a1c1a",
+                    "secondary-container": "#d4e1cd",
+                    "background": "#faf9f6",
+                    "primary-fixed": "#ffdad9",
+                    "surface-container-lowest": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#3e4a3b",
+                    "secondary": "#566252",
+                    "primary-container": "#d4a3a3",
+                    "inverse-primary": "#edbaba",
+                    "outline": "#827473",
+                    "on-primary-container": "#5c3939",
+                    "outline-variant": "#d4c2c2",
+                    "tertiary-fixed": "#efe0cd",
+                    "on-tertiary-fixed": "#221a0f"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "24px",
+                    "stack-md": "24px",
+                    "stack-sm": "12px",
+                    "stack-lg": "48px",
+                    "margin-desktop": "40px",
+                    "unit": "8px",
+                    "margin-mobile": "16px",
+                    "container-max": "1280px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Playfair Display"],
+                    "headline-md": ["Playfair Display"],
+                    "caption": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Playfair Display"],
+                    "headline-lg": ["Playfair Display"],
+                    "body-md": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "display-lg": ["64px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["28px", {"lineHeight": "1.3", "fontWeight": "500"}],
+                    "caption": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "1.4", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "headline-lg": ["40px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .champagne-shadow {
+            box-shadow: 0 20px 40px -10px rgba(124, 84, 84, 0.08);
+        }
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-md overflow-x-hidden">
+<!-- TopNavBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-desktop py-4 max-w-container-max mx-auto bg-surface/80 backdrop-blur-md">
+<div class="font-headline-lg text-headline-lg text-primary tracking-tight">Aisle</div>
+<nav class="hidden md:flex gap-8 items-center">
+<a class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors duration-300" href="#">Our Story</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors duration-300" href="#">Venues</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors duration-300" href="#">Packages</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors duration-300" href="#">Inspiration</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="hidden md:block text-on-surface-variant font-label-md hover:text-primary transition-colors">Sign In</button>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-full font-label-md scale-95 active:scale-90 transition-transform hover:shadow-lg">Start Planning</button>
+</div>
+</header>
+<!-- SideNavBar (Desktop Only) -->
+<aside class="fixed left-0 top-0 h-screen hidden md:flex flex-col py-stack-md border-r border-outline-variant/30 bg-surface-container-low w-64 rounded-r-xl z-40 mt-16 shadow-sm">
+<div class="px-6 mb-8">
+<div class="font-headline-md text-headline-md text-primary">Aisle</div>
+<p class="text-on-surface-variant text-caption">Planning your forever</p>
+</div>
+<nav class="flex-1 flex flex-col gap-1">
+<a class="text-on-surface-variant hover:bg-surface-variant/50 rounded-full mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-md">Dashboard</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-variant/50 rounded-full mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-md">Guest List</span>
+</a>
+<a class="bg-primary-container text-on-primary-container rounded-full mx-2 my-1 px-4 py-3 flex items-center gap-3 shadow-sm" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">payments</span>
+<span class="font-label-md">Budget</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-variant/50 rounded-full mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-label-md">Timeline</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-variant/50 rounded-full mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined">storefront</span>
+<span class="font-label-md">Vendors</span>
+</a>
+</nav>
+<div class="px-4 mt-auto">
+<div class="bg-primary-container/20 p-4 rounded-xl mb-6 border border-primary/10">
+<p class="font-label-md text-primary mb-2">Upgrade to Premium</p>
+<p class="text-caption text-on-surface-variant mb-3">Unlock advanced cost projections & expert advice.</p>
+<button class="w-full bg-primary text-on-primary py-2 rounded-full text-label-md text-sm">Explore Pro</button>
+</div>
+<div class="flex flex-col gap-1 border-t border-outline-variant/30 pt-4">
+<a class="text-on-surface-variant hover:bg-surface-variant/50 rounded-full px-4 py-2 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-md">Settings</span>
+</a>
+<a class="text-on-surface-variant hover:bg-surface-variant/50 rounded-full px-4 py-2 flex items-center gap-3 transition-all" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span class="font-label-md">Support</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="pt-24 pb-stack-lg md:ml-64 px-margin-mobile md:px-margin-desktop max-w-7xl">
+<!-- Header Section -->
+<section class="mb-stack-lg relative overflow-hidden">
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-primary/5 rounded-full blur-3xl floating-element"></div>
+<div class="relative z-10">
+<h1 class="font-display-lg text-display-lg text-primary mb-2">Your Budget</h1>
+<p class="font-body-lg text-on-surface-variant max-w-2xl">Curating every detail of your dream day, while keeping the magic balanced and transparent.</p>
+</div>
+</section>
+<!-- Stats Grid -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-stack-lg">
+<div class="bg-surface-container-lowest p-8 rounded-3xl champagne-shadow border border-surface-container-high relative group hover:-translate-y-1 transition-all">
+<div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-6 text-primary">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+<h3 class="font-label-md text-on-surface-variant mb-1 uppercase tracking-widest">Total Budget</h3>
+<p class="font-display-lg text-headline-lg text-primary">$45,000.00</p>
+<div class="mt-4 h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary w-full"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-8 rounded-3xl champagne-shadow border border-surface-container-high relative group hover:-translate-y-1 transition-all">
+<div class="w-12 h-12 bg-secondary-container/30 rounded-full flex items-center justify-center mb-6 text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">sell</span>
+</div>
+<h3 class="font-label-md text-on-surface-variant mb-1 uppercase tracking-widest">Allocated</h3>
+<p class="font-display-lg text-headline-lg text-secondary">$32,840.00</p>
+<div class="mt-4 h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[73%]"></div>
+</div>
+</div>
+<div class="bg-primary p-8 rounded-3xl shadow-xl relative group hover:-translate-y-1 transition-all overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-20">
+<span class="material-symbols-outlined text-6xl text-white">savings</span>
+</div>
+<h3 class="font-label-md text-on-primary/70 mb-1 uppercase tracking-widest relative z-10">Remaining</h3>
+<p class="font-display-lg text-headline-lg text-on-primary relative z-10">$12,160.00</p>
+<button class="mt-6 text-on-primary font-label-md flex items-center gap-2 group-hover:gap-3 transition-all relative z-10">
+                    Manage Expenses <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</section>
+<!-- Analysis & Chart Section -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-stack-lg">
+<!-- Category Allocation (Chart Simulation) -->
+<div class="lg:col-span-7 bg-surface-container-lowest p-8 rounded-3xl champagne-shadow border border-surface-container-high">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h2 class="font-headline-md text-primary">Cost Allocation</h2>
+<p class="text-caption text-on-surface-variant">Breakdown by wedding category</p>
+</div>
+<button class="text-primary font-label-md hover:underline">View Details</button>
+</div>
+<div class="space-y-6">
+<!-- Venue -->
+<div class="group">
+<div class="flex justify-between items-end mb-2">
+<span class="font-label-md text-on-surface">Venue & Rentals</span>
+<span class="text-caption font-semibold text-primary">$18,500</span>
+</div>
+<div class="h-3 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full w-[41%] group-hover:scale-x-105 transition-transform origin-left"></div>
+</div>
+</div>
+<!-- Catering -->
+<div class="group">
+<div class="flex justify-between items-end mb-2">
+<span class="font-label-md text-on-surface">Catering & Drinks</span>
+<span class="text-caption font-semibold text-primary">$8,200</span>
+</div>
+<div class="h-3 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full w-[18%] group-hover:scale-x-105 transition-transform origin-left"></div>
+</div>
+</div>
+<!-- Floral -->
+<div class="group">
+<div class="flex justify-between items-end mb-2">
+<span class="font-label-md text-on-surface">Floral & Decor</span>
+<span class="text-caption font-semibold text-primary">$4,500</span>
+</div>
+<div class="h-3 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-tertiary-container rounded-full w-[10%] group-hover:scale-x-105 transition-transform origin-left"></div>
+</div>
+</div>
+<!-- Photo -->
+<div class="group">
+<div class="flex justify-between items-end mb-2">
+<span class="font-label-md text-on-surface">Photography & Film</span>
+<span class="text-caption font-semibold text-primary">$3,200</span>
+</div>
+<div class="h-3 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-outline-variant rounded-full w-[7%] group-hover:scale-x-105 transition-transform origin-left"></div>
+</div>
+</div>
+<!-- Others -->
+<div class="group">
+<div class="flex justify-between items-end mb-2">
+<span class="font-label-md text-on-surface">Stationery & Others</span>
+<span class="text-caption font-semibold text-primary">$2,440</span>
+</div>
+<div class="h-3 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-surface-container-highest rounded-full w-[5%] group-hover:scale-x-105 transition-transform origin-left"></div>
+</div>
+</div>
+</div>
+<div class="mt-12 flex gap-4">
+<div class="bg-surface-container rounded-2xl p-4 flex-1">
+<p class="text-caption text-on-surface-variant">Average Category Spend</p>
+<p class="font-headline-md text-primary">$7,388</p>
+</div>
+<div class="bg-surface-container rounded-2xl p-4 flex-1">
+<p class="text-caption text-on-surface-variant">Total Vendors</p>
+<p class="font-headline-md text-primary">12</p>
+</div>
+</div>
+</div>
+<!-- Visual Inspiration / Image Column -->
+<div class="lg:col-span-5 flex flex-col gap-gutter">
+<div class="relative rounded-3xl overflow-hidden h-[300px] champagne-shadow">
+<img class="w-full h-full object-cover" data-alt="A dreamy, high-end outdoor wedding ceremony setup featuring a lush floral arch composed of pastel pink roses and peonies, set against the soft rolling hills of the Italian countryside at sunset. The lighting is golden and warm, creating a romantic and airy atmosphere. The focus is soft and editorial, capturing the essence of a whimsical celebration." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwuJqCN8gCF0y5sXLgc6Mmuhe4aTBasvCmYlvTeDtlzXbktpN_6rgxA0rcZDaU_wwJvjZNGMftYaFJcxX8JHWp2wxafSYQhjENx28HzJS_oFOKZKfb60XaFQyhIQH-naIhOxr4OvBEAzp8eFEIDaDvL6AaZ7eHlx9kqXMusge1r7Wnm9agxPPXf4S_t8xLeDsrhKYjX73wXnhBs-Y55Ux15yTfyDiv8ByiV-LGaCb523EYtLErDxAI"/>
+<div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/60 to-transparent">
+<p class="text-white font-label-md">Current Focus: Floral & Decor</p>
+</div>
+</div>
+<div class="bg-tertiary-fixed p-8 rounded-3xl flex-1 flex flex-col justify-center">
+<h3 class="font-headline-md text-on-tertiary-fixed mb-2 italic">"Your love is priceless, your planning is perfect."</h3>
+<p class="text-on-tertiary-fixed-variant text-body-md opacity-80">— Aisle Concierge Team</p>
+</div>
+</div>
+</section>
+<!-- Cost-Saving Insights (Gold-tinted AI Cards) -->
+<section class="mb-stack-lg">
+<div class="flex items-center gap-3 mb-8">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<h2 class="font-headline-md text-primary">Cost-Saving Insights</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Insight Card 1 -->
+<div class="bg-gradient-to-br from-tertiary-fixed to-surface-bright p-6 rounded-3xl border border-tertiary-fixed-dim/50 champagne-shadow hover:shadow-2xl transition-all group">
+<div class="bg-white/40 w-10 h-10 rounded-full flex items-center justify-center mb-4 text-primary">
+<span class="material-symbols-outlined">eco</span>
+</div>
+<h4 class="font-label-md text-on-tertiary-fixed mb-2">Sustainable Florals</h4>
+<p class="text-body-md text-on-tertiary-fixed-variant mb-4">Switching to seasonal local blooms could save up to <span class="font-bold text-primary">$1,200</span> on your current floral budget.</p>
+<a class="text-primary font-label-md flex items-center gap-2 group-hover:translate-x-1 transition-transform" href="#">Apply insight <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+</div>
+<!-- Insight Card 2 -->
+<div class="bg-gradient-to-br from-primary-fixed to-surface-bright p-6 rounded-3xl border border-primary-fixed-dim/50 champagne-shadow hover:shadow-2xl transition-all group">
+<div class="bg-white/40 w-10 h-10 rounded-full flex items-center justify-center mb-4 text-primary">
+<span class="material-symbols-outlined">schedule</span>
+</div>
+<h4 class="font-label-md text-on-primary-fixed mb-2">Weekday Venue Magic</h4>
+<p class="text-body-md text-on-primary-fixed-variant mb-4">Shifting to a Friday or Sunday ceremony at The Tuscan Villa can reduce venue costs by <span class="font-bold text-primary">15%</span>.</p>
+<a class="text-primary font-label-md flex items-center gap-2 group-hover:translate-x-1 transition-transform" href="#">Compare dates <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+</div>
+<!-- Insight Card 3 -->
+<div class="bg-gradient-to-br from-secondary-fixed to-surface-bright p-6 rounded-3xl border border-secondary-fixed-dim/50 champagne-shadow hover:shadow-2xl transition-all group">
+<div class="bg-white/40 w-10 h-10 rounded-full flex items-center justify-center mb-4 text-secondary">
+<span class="material-symbols-outlined">mail</span>
+</div>
+<h4 class="font-label-md text-on-secondary-fixed mb-2">Digital Stationery</h4>
+<p class="text-body-md text-on-secondary-fixed-variant mb-4">Choose digital Save-the-Dates to save <span class="font-bold text-secondary">$800</span> and reduce your wedding carbon footprint.</p>
+<a class="text-secondary font-label-md flex items-center gap-2 group-hover:translate-x-1 transition-transform" href="#">Explore templates <span class="material-symbols-outlined text-sm">chevron_right</span></a>
+</div>
+</div>
+</section>
+<!-- Detailed Breakdown (Table-less List) -->
+<section class="bg-surface-container-lowest p-8 rounded-3xl champagne-shadow border border-surface-container-high">
+<div class="flex justify-between items-center mb-8">
+<h2 class="font-headline-md text-primary">Expense Log</h2>
+<button class="bg-secondary-container text-on-secondary-container px-6 py-2 rounded-full font-label-md flex items-center gap-2 hover:bg-secondary-container/80 transition-colors">
+<span class="material-symbols-outlined text-sm">add</span> Add Expense
+                </button>
+</div>
+<div class="space-y-4">
+<!-- Item 1 -->
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-low rounded-2xl transition-colors group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl overflow-hidden bg-primary-fixed">
+<img class="w-full h-full object-cover" data-alt="A macro photograph of an elegant letterpress wedding invitation with gold wax seal and delicate floral embossing on textured ivory paper. The lighting is soft and natural, emphasizing the fine craft and tactile quality of the stationery." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoXmfDH--2Wl-sBWBoKBf1ltSTrhMZKBxd3t-zo51AZPZiTOZ8PoblMlulLgFxfxsVwKlNUuFIjujPuPFbKm7fMeeFzZwmjOu8fKn8_XdHe-CkLywpKWJKdXpJEQvRbeeDyb7hWxnwJVxZJzx7XptP8kWg-gaPwAiCMDs3zW2SW-KIqvz9aVxTjd7B3PieSIMMqQKiDaiCMKhUHvzZu2RGuaoWVZf8jvw1woGg3DDQIzreh729LPaa"/>
+</div>
+<div>
+<p class="font-label-md text-on-surface">Invitations & RSVP Cards</p>
+<p class="text-caption text-on-surface-variant">Papier & Grace • Paid on Oct 12</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-label-md text-on-surface">$1,450.00</p>
+<span class="text-[10px] px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container uppercase tracking-widest font-bold">Paid</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-low rounded-2xl transition-colors group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl overflow-hidden bg-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="A beautifully arranged bouquet of dusty rose and cream-colored ranunculus flowers with soft green eucalyptus leaves, tied with a long silk ribbon. The setting is bright and clean with soft, diffused morning light pouring in from a nearby window, creating a serene and sophisticated aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBW_buywUp8IBdQgjy5RjM1DIgZZe3R6OhcZvmVSZs9jeT7OIcGQhJcufut0oSQq6RZEGmVNsT_6B3PjaX3DjKeVRBNCRIxjIL8Y3K5Xddb4wDxtvZKs8aH-urTPQ8c_A4DNq0DCgJUc__jPMMWoKX6NdLIcemp-uFkbPAl6JpvVTIePq7jIGD3IJeDyrCOn0s5Zz77LF6iYUYN9XAhNAeyjokSXi7hF8mXIrcU5kIAgLwKHMaFS_3Z"/>
+</div>
+<div>
+<p class="font-label-md text-on-surface">Bridal Bouquet & Boutonnieres</p>
+<p class="text-caption text-on-surface-variant">Blooms of Florence • Deposit Paid</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-label-md text-on-surface">$850.00</p>
+<span class="text-[10px] px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed-variant uppercase tracking-widest font-bold">Partial</span>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center justify-between p-4 hover:bg-surface-container-low rounded-2xl transition-colors group">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">wine_bar</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface">Champagne Toast Package</p>
+<p class="text-caption text-on-surface-variant">The Vineyard Estate • Upcoming</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-label-md text-on-surface">$2,200.00</p>
+<span class="text-[10px] px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant uppercase tracking-widest font-bold">Planned</span>
+</div>
+</div>
+</div>
+<div class="mt-8 pt-8 border-t border-outline-variant/30 flex justify-center">
+<button class="text-primary font-label-md hover:underline flex items-center gap-2">
+                    Show All Transactions <span class="material-symbols-outlined text-sm">expand_more</span>
+</button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-stack-lg px-margin-desktop flex flex-col items-center gap-stack-sm bg-surface-container-highest">
+<div class="font-headline-md text-headline-md text-primary">Aisle</div>
+<nav class="flex gap-6 mb-4">
+<a class="text-on-surface-variant font-caption hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant font-caption hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-on-surface-variant font-caption hover:text-primary transition-colors" href="#">Contact Us</a>
+</nav>
+<p class="text-on-surface-variant font-caption text-center">© 2024 Aisle Wedding Planning. Crafted with love for your special moments.</p>
+<div class="flex gap-4 mt-4 text-primary">
+<span class="material-symbols-outlined cursor-pointer hover:scale-110 transition-transform">favorite</span>
+<span class="material-symbols-outlined cursor-pointer hover:scale-110 transition-transform">share</span>
+<span class="material-symbols-outlined cursor-pointer hover:scale-110 transition-transform">mail</span>
+</div>
+</footer>
+<!-- Interactive Layer: Floating FAB for Mobile -->
+<button class="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-primary text-on-primary rounded-full shadow-2xl flex items-center justify-center z-50 active:scale-90 transition-transform">
+<span class="material-symbols-outlined">add</span>
+</button>
+<script>
+        // Subtle interaction for cards
+        document.querySelectorAll('.champagne-shadow').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
+                card.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0px)';
+            });
+        });
+
+        // Dynamic budget highlight micro-animation on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const bars = document.querySelectorAll('.h-full.bg-primary-container, .h-full.bg-secondary-container, .h-full.bg-tertiary-container, .h-full.bg-outline-variant, .h-full.bg-surface-container-highest');
+            bars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.transition = 'width 1.5s cubic-bezier(0.22, 1, 0.36, 1)';
+                    bar.style.width = width;
+                }, 300);
+            });
+        });
+    </script>
+</body></html>

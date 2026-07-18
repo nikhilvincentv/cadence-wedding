@@ -110,62 +110,62 @@ export default function Budget({ data, persist }) {
       </div>
 
       {/* ── Summary metric cards ────────────────────────────────── */}
-      <div className="grid cols-3" style={{ marginBottom: 24 }}>
-        <div className="card stat">
-          <span className="label">Total Budget</span>
-          <span className="value" style={{ fontFamily: 'var(--serif)', fontSize: 28 }}>
-            {fmtCurrency(budgetTotal)}
-          </span>
-          <span className="foot">Wedding budget target</span>
+      <div className="budget-icon-row">
+        <div className="budget-stat-card">
+          <div className="budget-stat-icon">◈</div>
+          <div className="budget-stat-label">Total Budget</div>
+          <div className="budget-stat-value">{fmtCurrency(budgetTotal)}</div>
         </div>
-        <div className="card stat">
-          <span className="label">Amount Spent</span>
-          <span
-            className="value"
-            style={{
-              fontFamily: 'var(--serif)',
-              fontSize: 28,
-              color: totalSpent > budgetTotal ? 'var(--red)' : 'inherit',
-            }}
-          >
+        <div className="budget-stat-card">
+          <div className="budget-stat-icon">✦</div>
+          <div className="budget-stat-label">Amount Spent</div>
+          <div className="budget-stat-value" style={{ color: totalSpent > budgetTotal ? 'var(--red)' : undefined }}>
             {fmtCurrency(totalSpent)}
-          </span>
-          <span className="foot">
-            {budgetTotal > 0
-              ? `${Math.round((totalSpent / budgetTotal) * 100)}% of budget used`
-              : 'Sum of all actuals'}
-          </span>
+          </div>
           {budgetTotal > 0 && (
-            <div className="bar" style={{ marginTop: 6 }}>
-              <i
-                style={{
-                  width: `${Math.min(100, Math.round((totalSpent / budgetTotal) * 100))}%`,
-                  background:
-                    totalSpent > budgetTotal
-                      ? 'var(--red)'
-                      : 'linear-gradient(90deg, var(--rose), var(--gold))',
-                }}
+            <div className="budget-allocation-track" style={{ marginTop: 12 }}>
+              <div
+                className={`budget-allocation-fill ${totalSpent > budgetTotal ? 'over' : ''}`}
+                style={{ width: `${Math.min(100, Math.round((totalSpent / budgetTotal) * 100))}%` }}
               />
             </div>
           )}
         </div>
-        <div className="card stat">
-          <span className="label">Amount Remaining</span>
-          <span
-            className="value"
-            style={{
-              fontFamily: 'var(--serif)',
-              fontSize: 28,
-              color: totalRemaining < 0 ? 'var(--red)' : 'var(--green)',
-            }}
-          >
-            {fmtCurrency(totalRemaining)}
-          </span>
-          <span className="foot">
-            {totalRemaining < 0 ? 'Over budget!' : 'Still available'}
-          </span>
+        <div className="budget-stat-card accent">
+          <div className="budget-stat-icon">⛁</div>
+          <div className="budget-stat-label">Amount Remaining</div>
+          <div className="budget-stat-value">{fmtCurrency(totalRemaining)}</div>
         </div>
       </div>
+
+      {/* ── Cost allocation visual breakdown ─────────────────────── */}
+      {budgetCategories.length > 0 && (
+        <div className="card pad-lg mt" style={{ marginBottom: 24 }}>
+          <div className="row between mb-sm">
+            <h2 className="section-title" style={{ margin: 0 }}>Cost allocation</h2>
+            <span className="faint" style={{ fontSize: 12.5 }}>Breakdown by category</span>
+          </div>
+          {budgetCategories
+            .slice()
+            .sort((a, b) => (Number(b.actual) || 0) - (Number(a.actual) || 0))
+            .map((c) => {
+              const amt = Number(c.actual) || 0
+              const pct = totalSpent > 0 ? Math.round((amt / totalSpent) * 100) : 0
+              const isOver = (Number(c.actual) || 0) > (Number(c.projected) || 0)
+              return (
+                <div className="budget-allocation-row" key={c.id}>
+                  <div className="budget-allocation-head">
+                    <span style={{ fontSize: 13.5, fontWeight: 600 }}>{c.name || 'Unnamed'}</span>
+                    <span className="mono" style={{ fontSize: 12.5, color: 'var(--rose-deep)', fontWeight: 600 }}>{fmtCurrency(amt)}</span>
+                  </div>
+                  <div className="budget-allocation-track">
+                    <div className={`budget-allocation-fill ${isOver ? 'over' : ''}`} style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              )
+            })}
+        </div>
+      )}
 
       {/* ── Over-budget alert banner ─────────────────────────────── */}
       {overBudgetCategories.length > 0 && (

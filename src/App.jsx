@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useUser, useClerk } from '@clerk/clerk-react'
 import { getStatus, getState, saveState, daysUntil } from './api.js'
+import Onboarding from './Onboarding.jsx'
 import CommandCenter from './views/CommandCenter.jsx'
 import TimelineView from './views/TimelineView.jsx'
 import Contracts from './views/Contracts.jsx'
@@ -40,6 +41,7 @@ export default function App() {
     getStatus().then(setStatus).catch(() => setStatus({ enabled: false, model: 'demo', provider: 'built-in' }))
   }, [])
 
+  // Listen for ⌘K / Ctrl+K global search palette trigger
   useEffect(() => {
     const onKey = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -51,6 +53,7 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // Fetch wedding state once authentication details are fully loaded
   useEffect(() => {
     if (!isLoaded || !userId) return
     getState(userId).then(setData)
@@ -70,6 +73,12 @@ export default function App() {
   function persist(next) {
     setData(next)
     saveState(userId, next)
+  }
+
+  const legacyAlreadyOnboarded = data.completedOnboarding === undefined && !!data.wedding?.couple
+  const needsOnboarding = !data.completedOnboarding && !legacyAlreadyOnboarded
+  if (needsOnboarding) {
+    return <Onboarding data={data} persist={persist} onComplete={() => {}} />
   }
 
   return (
@@ -107,7 +116,16 @@ export default function App() {
             <div className="faint" style={{ fontSize: 11, lineHeight: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.primaryEmailAddress?.emailAddress || data.wedding.couple || 'Signed in'}
             </div>
-            <button className="icon-btn" onClick={() => signOut()}>Sign out</button>
+            <button
+              className="icon-btn"
+              onClick={() => {
+                localStorage.removeItem('cadence_dev_bypass')
+                if (user) signOut()
+                else window.location.reload()
+              }}
+            >
+              Sign out
+            </button>
           </div>
         </div>
       </aside>

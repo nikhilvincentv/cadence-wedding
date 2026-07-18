@@ -11,6 +11,22 @@ export function emptyWedding() {
   }
 }
 
+export function emptyOnboarding() {
+  return {
+    firstName: '',
+    partnerName: '',
+    weddingDate: '',
+    weddingDateUnknown: false,
+    location: { city: '', state: '', country: '' },
+    guestCount: null,
+    budget: null,
+    styles: [],
+    priorities: [],
+    planningStage: '',
+    aiPreferences: [],
+  }
+}
+
 export function emptyState() {
   return {
     wedding: emptyWedding(),
@@ -24,6 +40,8 @@ export function emptyState() {
     inboxThreads: [],
     tasks: [],
     contractAnalyses: {},
+    ...emptyOnboarding(),
+    completedOnboarding: false,
   }
 }
 
