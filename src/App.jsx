@@ -30,7 +30,7 @@ export default function App() {
   if (!data) {
     return (
       <div style={{ display: 'grid', placeItems: 'center', height: '100vh' }}>
-        <div className="row"><span className="spin" /> <span className="muted">Loading your wedding...</span></div>
+        <div className="row"><span className="spin" /> <span className="muted">Loading your account...</span></div>
       </div>
     )
   }
@@ -41,14 +41,6 @@ export default function App() {
   function persist(next) {
     setData(next)
     saveState(userId, next)
-  }
-
-  function addPayments(pays) {
-    persist({ ...data, payments: [...data.payments, ...pays] })
-  }
-
-  function setTimeline(timeline) {
-    persist({ ...data, timeline })
   }
 
   return (
@@ -70,7 +62,7 @@ export default function App() {
         <div className="nav-foot">
           <div className={`aipill ${live ? 'live' : 'demo'}`}>
             <span className="dot" />
-            {live ? `Live · ${status.model}` : 'Demo mode · built-in reasoner'}
+            {live ? `AI live · ${status.model}` : 'AI offline · built-in reasoner'}
           </div>
           <div className={`aipill ${data.persisted ? 'live' : 'demo'}`} style={{ marginTop: 8 }}>
             <span className="dot" />
@@ -78,7 +70,7 @@ export default function App() {
           </div>
           <div className="row between" style={{ marginTop: 12 }}>
             <div className="faint" style={{ fontSize: 11, lineHeight: 1.5 }}>
-              {data.wedding.couple} · {days} days out
+              {data.wedding.couple ? `${data.wedding.couple}${days != null ? ` · ${days} days out` : ''}` : 'No wedding yet'}
             </div>
             <UserButton afterSignOutUrl="/" />
           </div>
@@ -87,13 +79,13 @@ export default function App() {
 
       <main className="main">
         {view === 'home' && (
-          <CommandCenter state={data} payments={data.payments} status={status} goto={setView} days={days} />
+          <CommandCenter data={data} persist={persist} status={status} goto={setView} days={days} />
         )}
         {view === 'timeline' && (
-          <TimelineView state={data} timeline={data.timeline} setTimeline={setTimeline} live={live} />
+          <TimelineView data={data} persist={persist} live={live} />
         )}
         {view === 'contracts' && (
-          <Contracts state={data} live={live} onExtracted={addPayments} />
+          <Contracts data={data} persist={persist} live={live} />
         )}
       </main>
     </div>

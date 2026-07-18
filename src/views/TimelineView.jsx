@@ -1,54 +1,80 @@
 import React, { useMemo, useState } from 'react'
 import { runCascade } from '../api.js'
+import { Modal, Field, SelectField } from '../components/Modal.jsx'
+
+const uid = () => Math.random().toString(36).slice(2, 9)
+
+function parseMinutes(time) {
+  const m = String(time || '').match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i)
+  if (!m) return 0
+  let h = Number(m[1]) % 12
+  if (m[3] && m[3].toUpperCase() === 'PM') h += 12
+  return h * 60 + Number(m[2])
+}
 
 const SCENARIOS = [
-  { key: 'photo', label: 'Photographer runs 1 hr late', text: 'Our photographer just texted - her earlier wedding ran long and she will arrive at 12:30 PM instead of 11:30 AM.' },
-  { key: 'ceremony', label: 'Ceremony delayed 30 min (guest traffic)', text: 'Heavy traffic into Woodinville - guests are still arriving, so the ceremony will start ~30 minutes late.' },
-  { key: 'rain', label: 'Rain - move ceremony under the tent', text: 'The forecast just turned to rain during setup. We need to move the outdoor garden ceremony under the reception tent.' },
+  { key: 'photo', label: 'Photographer runs 1 hr late', text: 'Our photographer just texted - she will arrive an hour late.' },
+  { key: 'ceremony', label: 'Ceremony delayed 30 min', text: 'Guests are stuck in traffic, so the ceremony will start about 30 minutes late.' },
+  { key: 'rain', label: 'Rain - move ceremony indoors', text: 'The forecast just turned to rain. We need to move the outdoor ceremony under cover.' },
 ]
 
-export default function TimelineView({ state, timeline, setTimeline, live }) {
-  const { wedding, vendors } = state
+export default function TimelineView({ data, persist, live }) {
+  const { wedding, vendors } = data
+  const timeline = [...(data.timeline || [])].sort((a, b) => (a.minutes || 0) - (b.minutes || 0))
+
   const [text, setText] = useState('')
   const [active, setActive] = useState(null)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
-  const [applied, setApplied] = useState(false)
   const [copied, setCopied] = useState(null)
+  const [modal, setModal] = useState(false)
+  const [draft, setDraft] = useState({})
 
-  const vName = (id) => vendors.find((v) => v.id === id)?.name || id
-  const conflictVendorIds = useMemo(
-    () => new Set((result?.conflicts || []).map((c) => c.vendorId)),
-    [result]
-  )
+  const vName = (id) => vendors.find((v) => v.id === id)?.name || id || 'Unassigned'
+  const conflictVendorIds = useMemo(() => new Set((result?.conflicts || []).map((c) => c.vendorId)), [result])
+
+  function openAdd(item) {
+    setDraft(item ? { ...item } : {})
+    setModal(true)
+  }
+  const set = (k, v) => setDraft((d) => ({ ...d, [k]: v }))
+  function saveEvent() {
+    const ev = {
+      id: draft.id || uid(),
+      time: draft.time || '12:00 PM',
+      minutes: parseMinutes(draft.time),
+      title: draft.title || 'Untitled',
+      vendorId: draft.vendorId || '',
+      durationMin: Number(draft.durationMin) || 30,
+      locked: !!draft.locked,
+      note: draft.note || '',
+    }
+    const next = draft.id ? data.timeline.map((x) => (x.id === ev.id ? ev : x)) : [...data.timeline, ev]
+    persist({ ...data, timeline: next })
+    setModal(false)
+  }
+  function removeEvent(id) {
+    persist({ ...data, timeline: data.timeline.filter((e) => e.id !== id) })
+  }
 
   async function run(payloadText) {
     const change = (payloadText ?? text).trim()
     if (!change) return
     setLoading(true)
     setResult(null)
-    setApplied(false)
     try {
-      const r = await runCascade({
-        change,
-        timeline,
-        vendors,
-        wedding,
-      })
-      setResult(r)
+      setResult(await runCascade({ change, timeline, vendors, wedding }))
     } catch (e) {
       setResult({ error: String(e.message || e) })
     } finally {
       setLoading(false)
     }
   }
-
   function pickScenario(s) {
     setActive(s.key)
     setText(s.text)
     run(s.text)
   }
-
   function copy(msg, i) {
     navigator.clipboard?.writeText(msg)
     setCopied(i)
@@ -64,7 +90,7 @@ export default function TimelineView({ state, timeline, setTimeline, live }) {
         <div>
           <div className="eyebrow">Timeline & Cascade Engine</div>
           <h1 className="page">The day, and everything it touches</h1>
-          <div className="page-sub">Change one thing. Cadence traces the ripple across all {vendors.length} vendors and fixes it.</div>
+          <div className="page-sub">Build your day-of timeline, then change one thing and let Cadence trace the ripple.</div>
         </div>
       </div>
 
@@ -72,8 +98,9 @@ export default function TimelineView({ state, timeline, setTimeline, live }) {
         <div className="card pad-lg">
           <div className="row between mb-sm">
             <h2 className="section-title" style={{ margin: 0 }}>Day-of timeline</h2>
-            <span className="faint" style={{ fontSize: 12 }}>Sunset {wedding.sunset}</span>
+            <button className="btn sm" onClick={() => openAdd(null)}>+ Add event</button>
           </div>
+          {timeline.length === 0 && <div className="faint" style={{ fontSize: 13, padding: '14px 0' }}>No events yet. Add your hair & makeup, first look, ceremony, and the rest.</div>}
           <div className="tl">
             {timeline.map((t) => {
               const conflicted = conflictVendorIds.has(t.vendorId)
@@ -89,6 +116,8 @@ export default function TimelineView({ state, timeline, setTimeline, live }) {
                     <div className="row gap-sm wrap" style={{ marginTop: 5 }}>
                       <span className="tag">{vName(t.vendorId)}</span>
                       <span className="faint mono" style={{ fontSize: 11 }}>{t.durationMin}m</span>
+                      <button className="icon-btn" onClick={() => openAdd(t)}>edit</button>
+                      <button className="icon-btn" onClick={() => removeEvent(t.id)}>del</button>
                     </div>
                     {t.note && <div className="tl-note">{t.note}</div>}
                   </div>
@@ -101,24 +130,14 @@ export default function TimelineView({ state, timeline, setTimeline, live }) {
         <div className="stack">
           <div className="card pad-lg">
             <h2 className="section-title">Simulate a disruption</h2>
-            <textarea
-              className="field"
-              rows={2}
-              placeholder="Describe what just changed - e.g. 'the florist cannot deliver until 2pm'..."
-              value={text}
-              onChange={(e) => { setText(e.target.value); setActive(null) }}
-            />
+            <textarea className="field" rows={2} placeholder="Describe what just changed - e.g. 'the florist cannot deliver until 2pm'..." value={text} onChange={(e) => { setText(e.target.value); setActive(null) }} />
             <div className="scenario-chips">
               {SCENARIOS.map((s) => (
-                <button key={s.key} className={`chip ${active === s.key ? 'on' : ''}`} onClick={() => pickScenario(s)}>
-                  {s.label}
-                </button>
+                <button key={s.key} className={`chip ${active === s.key ? 'on' : ''}`} onClick={() => pickScenario(s)}>{s.label}</button>
               ))}
             </div>
             <div className="row between mt">
-              <span className="faint" style={{ fontSize: 12 }}>
-                {live ? 'Reasoning with a live model' : 'Built-in reasoner (offline-safe)'}
-              </span>
+              <span className="faint" style={{ fontSize: 12 }}>{live ? 'Reasoning with a live model' : 'Built-in reasoner (offline-safe)'}</span>
               <button className="btn primary" onClick={() => run()} disabled={loading || !text.trim()}>
                 {loading ? <><span className="spin" /> Tracing...</> : 'Trace the ripple'}
               </button>
@@ -135,27 +154,29 @@ export default function TimelineView({ state, timeline, setTimeline, live }) {
             </div>
           )}
 
-          {result && !result.error && (
-            <CascadeResult
-              result={result}
-              sevClass={sevClass}
-              applied={applied}
-              onApply={() => setApplied(true)}
-              copy={copy}
-              copied={copied}
-            />
-          )}
-
-          {result?.error && (
-            <div className="card pad-lg"><span className="badge high">error</span> <span className="muted">{result.error}</span></div>
-          )}
+          {result && !result.error && <CascadeResult result={result} sevClass={sevClass} copy={copy} copied={copied} />}
+          {result?.error && <div className="card pad-lg"><span className="badge high">error</span> <span className="muted">{result.error}</span></div>}
         </div>
       </div>
+
+      {modal && (
+        <Modal title={draft.id ? 'Edit event' : 'Add event'} onClose={() => setModal(false)} onSubmit={saveEvent}>
+          <Field label="Time" placeholder="e.g. 4:00 PM" value={draft.time || ''} onChange={(e) => set('time', e.target.value)} />
+          <Field label="Title" value={draft.title || ''} onChange={(e) => set('title', e.target.value)} />
+          <SelectField label="Vendor" options={[{ value: '', label: '— none —' }, ...vendors.map((v) => ({ value: v.id, label: v.name }))]} value={draft.vendorId || ''} onChange={(e) => set('vendorId', e.target.value)} />
+          <Field label="Duration (min)" type="number" value={draft.durationMin || ''} onChange={(e) => set('durationMin', e.target.value)} />
+          <Field label="Note (optional)" value={draft.note || ''} onChange={(e) => set('note', e.target.value)} />
+          <label className="field-row" style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <input type="checkbox" checked={!!draft.locked} onChange={(e) => set('locked', e.target.checked)} />
+            <span className="field-label">Locked (cannot move — permit, ceremony start)</span>
+          </label>
+        </Modal>
+      )}
     </div>
   )
 }
 
-function CascadeResult({ result, sevClass, applied, onApply, copy, copied }) {
+function CascadeResult({ result, sevClass, copy, copied }) {
   return (
     <div className="stack fade-in">
       <div className="card pad-lg">
@@ -192,25 +213,15 @@ function CascadeResult({ result, sevClass, applied, onApply, copy, copied }) {
 
       {result.fix && (
         <div className="card pad-lg">
-          <div className="row between mb-sm">
-            <h2 className="section-title" style={{ margin: 0 }}>Recommended fix</h2>
-            <button className="btn primary sm" onClick={onApply} disabled={applied}>
-              {applied ? 'Applied to plan' : 'Apply fix'}
-            </button>
-          </div>
+          <h2 className="section-title">Recommended fix</h2>
           <div className="fix-box">
             <div className="fix-headline">{result.fix.headline}</div>
             <div style={{ marginTop: 10 }}>
               {result.fix.changes?.map((ch, i) => (
-                <div className="fix-change" key={i}>
-                  <span style={{ color: 'var(--green)' }}>&rarr;</span>
-                  <div><b>{ch.target}:</b> {ch.action}</div>
-                </div>
+                <div className="fix-change" key={i}><span style={{ color: 'var(--green)' }}>&rarr;</span><div><b>{ch.target}:</b> {ch.action}</div></div>
               ))}
             </div>
-            {result.fix.tradeoff && (
-              <div className="faint" style={{ fontSize: 12.5, marginTop: 10, fontStyle: 'italic' }}>Trade-off: {result.fix.tradeoff}</div>
-            )}
+            {result.fix.tradeoff && <div className="faint" style={{ fontSize: 12.5, marginTop: 10, fontStyle: 'italic' }}>Trade-off: {result.fix.tradeoff}</div>}
           </div>
         </div>
       )}

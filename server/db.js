@@ -1,5 +1,5 @@
 import { neon } from '@neondatabase/serverless'
-import { fullState, sampleContracts } from './data.js'
+import { emptyState, sampleContracts } from './data.js'
 
 const url = process.env.DATABASE_URL
 const sql = url ? neon(url) : null
@@ -18,8 +18,7 @@ async function ensureSchema() {
 }
 
 function template() {
-  const s = fullState()
-  return { wedding: s.wedding, vendors: s.vendors, timeline: s.timeline, payments: s.payments, alerts: s.alerts }
+  return emptyState()
 }
 
 export async function getUserState(userId) {
