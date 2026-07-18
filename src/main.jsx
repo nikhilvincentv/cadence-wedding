@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-react'
+import { ClerkProvider, SignedIn, SignedOut, AuthenticateWithRedirectCallback } from '@clerk/clerk-react'
 import App from './App.jsx'
 import LoginScreen from './LoginScreen.jsx'
 import './styles.css'
@@ -23,15 +23,23 @@ const clerkAppearance = {
   },
 }
 
+const isSSOCallback = window.location.pathname.endsWith('/sso-callback')
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ClerkProvider publishableKey={PUBLISHABLE_KEY} appearance={clerkAppearance} afterSignOutUrl="/">
-      <SignedIn>
-        <App />
-      </SignedIn>
-      <SignedOut>
-        <LoginScreen />
-      </SignedOut>
+      {isSSOCallback ? (
+        <AuthenticateWithRedirectCallback />
+      ) : (
+        <>
+          <SignedIn>
+            <App />
+          </SignedIn>
+          <SignedOut>
+            <LoginScreen />
+          </SignedOut>
+        </>
+      )}
     </ClerkProvider>
   </React.StrictMode>
 )

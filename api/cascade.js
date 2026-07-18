@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {}
-  const { change, timeline, vendors, wedding } = body
+  const { change, timeline, vendors, wedding, profile } = body
   if (!change || typeof change !== 'string')
     return res.status(400).json({ error: 'Missing "change" description.' })
 
@@ -16,6 +16,7 @@ export default async function handler(req, res) {
     wedding: wedding || state.wedding,
     vendors: vendors || state.vendors,
     timeline: timeline || state.timeline,
+    profile: profile || null,
     change,
   }
 

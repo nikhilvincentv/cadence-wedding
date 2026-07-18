@@ -34,7 +34,7 @@ Respond ONLY with strict JSON matching this schema:
 }
 vendorId must be one of the ids provided in the input.`
 
-export function cascadeUser({ wedding, vendors, timeline, change }) {
+export function cascadeUser({ wedding, vendors, timeline, change, profile }) {
   const vendorList = vendors
     .map((v) => `- ${v.id}: ${v.name} (${v.category}, contact ${v.contact})`)
     .join('\n')
@@ -47,8 +47,14 @@ export function cascadeUser({ wedding, vendors, timeline, change }) {
     )
     .join('\n')
 
-  return `WEDDING: ${wedding.couple}, ${wedding.dateLabel}, ${wedding.venue}.
-Sunset: ${wedding.sunset}. Guests: ${wedding.guestCount}.
+  const prefs = profile
+    ? `\n\nTHIS COUPLE'S STATED PRIORITIES: ${(profile.priorities || []).join(', ') || 'none stated'}.
+Wedding style: ${profile.style || 'unspecified'}. Planning stage: ${profile.stage || 'unspecified'}.
+When ranking conflict severity, weigh anything that threatens their top priorities more heavily, and match your notification tone to their style.`
+    : ''
+
+  return `WEDDING: ${wedding.couple || 'the couple'}, ${wedding.dateLabel}, ${wedding.venue}.
+Sunset: ${wedding.sunset}. Guests: ${wedding.guestCount}.${prefs}
 
 VENDORS:
 ${vendorList}

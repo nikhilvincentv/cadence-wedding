@@ -39,7 +39,7 @@ app.post('/api/state', async (req, res) => {
 })
 
 app.post('/api/cascade', async (req, res) => {
-  const { change, timeline, vendors, wedding } = req.body || {}
+  const { change, timeline, vendors, wedding, profile } = req.body || {}
   if (!change || typeof change !== 'string')
     return res.status(400).json({ error: 'Missing "change" description.' })
 
@@ -48,6 +48,7 @@ app.post('/api/cascade', async (req, res) => {
     wedding: wedding || state.wedding,
     vendors: vendors || state.vendors,
     timeline: timeline || state.timeline,
+    profile: profile || null,
     change,
   }
 
