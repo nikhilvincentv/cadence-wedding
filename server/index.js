@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { fullState } from './data.js'
 import { aiStatus, chatJSON } from './ai.js'
-import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser } from './prompts.js'
-import { cascadeFallback, contractFallback } from './fallback.js'
+import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser, SEATING_SYSTEM, seatingUser } from './prompts.js'
+import { cascadeFallback, contractFallback, seatingFallback } from './fallback.js'
 import { getUserState, saveUserState } from './db.js'
 
 const app = express()
@@ -62,6 +62,23 @@ app.post('/api/cascade', async (req, res) => {
     return res.json({ ...result, source: 'model' })
   } catch (err) {
     return res.json({ ...cascadeFallback(change), source: 'demo', note: String(err.message || err) })
+  }
+})
+
+app.post('/api/seating', async (req, res) => {
+  const { guests, tables, notes } = req.body || {}
+  if (!Array.isArray(guests) || !Array.isArray(tables) || tables.length === 0)
+    return res.status(400).json({ error: 'Need guests and at least one table.' })
+  try {
+    const result = await chatJSON({
+      system: SEATING_SYSTEM,
+      user: seatingUser({ guests, tables, notes }),
+      temperature: 0.3,
+      maxTokens: 1500,
+    })
+    return res.json({ ...result, source: 'model' })
+  } catch (err) {
+    return res.json({ ...seatingFallback({ guests, tables }), source: 'demo' })
   }
 })
 

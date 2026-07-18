@@ -34,6 +34,13 @@ export const runCascade = (body) =>
     .then(j)
     .catch(() => ({ ...cascadeFallback(body.change), source: 'demo' }))
 
+export const runSeating = (body) =>
+  fetch('/api/seating', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  }).then(j)
+
 export const extractContract = (text) =>
   fetch('/api/contract', {
     method: 'POST',

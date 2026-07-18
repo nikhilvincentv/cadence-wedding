@@ -157,3 +157,38 @@ USER MESSAGE:
 
 Respond helpfully. Include a <mutation> block only if proposing concrete data changes.`
 }
+
+export const SEATING_SYSTEM = `You are an expert wedding seating planner.
+You assign guests to reception tables the way a thoughtful coordinator would.
+
+Rules you must follow:
+- Never exceed a table's capacity.
+- Keep family members and friend groups together at the same table when possible.
+- Try to balance the two sides of the family across the room rather than fully segregating them.
+- Seat guests who requested lodging/transport near each other when it helps logistics.
+- Every guest provided must be assigned to exactly one table. If there is not enough capacity, fill tables to capacity and leave the rest unassigned (tableId null).
+
+Respond ONLY with strict JSON:
+{
+  "summary": "one sentence describing the arrangement",
+  "reasoning": ["short step", "short step", ...],
+  "assignments": [ { "guestId": "abc", "tableId": "t1" } ]
+}
+guestId must be one of the provided guest ids. tableId must be one of the provided table ids, or null if unassigned.`
+
+export function seatingUser({ guests, tables, notes }) {
+  const guestList = guests
+    .map((g) => `- ${g.id}: ${g.name} (${g.relationship || 'guest'}, rsvp: ${g.rsvp || 'awaiting'}${g.notes ? `, note: ${g.notes}` : ''})`)
+    .join('\n')
+  const tableList = tables
+    .map((t) => `- ${t.id}: ${t.name} (capacity ${t.capacity})`)
+    .join('\n')
+
+  return `GUESTS TO SEAT (${guests.length}):
+${guestList}
+
+TABLES (${tables.length}):
+${tableList}
+
+${notes ? `SPECIAL REQUESTS: ${notes}\n\n` : ''}Assign every guest to a table following your rules, and respond with the JSON described in your instructions.`
+}

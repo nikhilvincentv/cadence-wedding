@@ -868,3 +868,12 @@ select.field { appearance: none; }
     grid-template-columns: 1fr;
   }
 }
+
+.seat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 16px; }
+.seat-table { border: 1px solid var(--line); border-radius: 14px; background: var(--bg-1); min-height: 130px; display: flex; flex-direction: column; }
+.seat-table.unassigned { border-style: dashed; background: var(--bg); }
+.seat-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--line-soft); font-size: 13.5px; }
+.seat-body { padding: 12px 14px; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; flex: 1; min-height: 60px; }
+.seat-chip { display: inline-flex; align-items: center; gap: 7px; padding: 6px 11px; border-radius: 999px; background: var(--bg-2); border: 1px solid var(--line); font-size: 12.5px; cursor: grab; user-select: none; }
+.seat-chip:active { cursor: grabbing; }
+.seat-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }

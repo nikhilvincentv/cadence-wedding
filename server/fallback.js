@@ -192,3 +192,36 @@ export function contractFallback(text = '') {
 
   return { vendorName, category, payments, hiddenFees, gratuityIncluded, cancellation, keyDates, watchOuts }
 }
+
+export function seatingFallback({ guests = [], tables = [] }) {
+  const order = { family: 0, friends: 1, coworkers: 2, other: 3 }
+  const sorted = [...guests].sort((a, b) => (order[a.relationship] ?? 9) - (order[b.relationship] ?? 9))
+  const assignments = []
+  const counts = {}
+  tables.forEach((t) => { counts[t.id] = 0 })
+  let ti = 0
+  for (const g of sorted) {
+    let placed = false
+    for (let step = 0; step < tables.length; step++) {
+      const t = tables[(ti + step) % tables.length]
+      if (counts[t.id] < t.capacity) {
+        assignments.push({ guestId: g.id, tableId: t.id })
+        counts[t.id]++
+        ti = (ti + step) % tables.length
+        placed = true
+        break
+      }
+    }
+    if (!placed) assignments.push({ guestId: g.id, tableId: null })
+  }
+  const seated = assignments.filter((a) => a.tableId).length
+  return {
+    summary: `Seated ${seated} of ${guests.length} guests across ${tables.length} tables, keeping relationship groups together.`,
+    reasoning: [
+      'Grouped guests by relationship (family, then friends, coworkers, others).',
+      'Filled each table to capacity before moving to the next.',
+      'Kept members of the same group adjacent so they share tables.',
+    ],
+    assignments,
+  }
+}

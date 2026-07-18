@@ -8,6 +8,7 @@ import Budget from './views/Budget.jsx'
 import Guests from './views/Guests.jsx'
 import AICoordinator from './views/AICoordinator.jsx'
 import Vendors from './views/Vendors.jsx'
+import Seating from './views/Seating.jsx'
 
 const NAV = [
   { id: 'home',        label: 'Dashboard',       icon: '⌂' },
@@ -110,7 +111,7 @@ export default function App() {
           <Vendors data={data} persist={persist} setView={setView} />
         )}
         {view === 'seating' && (
-          <div className="view-placeholder">Seating — coming soon</div>
+          <Seating data={data} persist={persist} live={live} />
         )}
         {view === 'inspiration' && (
           <div className="view-placeholder">Inspiration — coming soon</div>
