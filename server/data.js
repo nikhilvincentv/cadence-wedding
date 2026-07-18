@@ -39,6 +39,7 @@ export function emptyState() {
     seatingTables: [],
     inboxThreads: [],
     tasks: [],
+    inspirationBoard: [],
     contractAnalyses: {},
     ...emptyOnboarding(),
     completedOnboarding: false,

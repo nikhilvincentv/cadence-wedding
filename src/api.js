@@ -57,6 +57,11 @@ export const findNearbyVendors = (venue) =>
     .then(j)
     .catch(() => ({ error: 'Could not reach the map service.' }))
 
+export const searchInspiration = (q, page = 1) =>
+  fetch(`/api/images?q=${encodeURIComponent(q)}&page=${page}`)
+    .then(j)
+    .catch(() => ({ error: 'Could not reach the image search service.', results: [] }))
+
 export const reindexSearch = (userId, data) =>
   fetch('/api/search', {
     method: 'POST',
