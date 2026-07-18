@@ -18,6 +18,12 @@ export function emptyState() {
     timeline: [],
     payments: [],
     alerts: [],
+    guests: [],
+    budgetCategories: [],
+    seatingTables: [],
+    inboxThreads: [],
+    tasks: [],
+    contractAnalyses: {},
   }
 }
 

@@ -1,0 +1,173 @@
+# Tasks — VowsOS
+
+## Task List
+
+- [x] 1 Extend state data model and persistence layer
+  - [x] 1.1 Add guests, budgetCategories, seatingTables, inboxThreads, tasks, contractAnalyses to emptyState() in server/data.js
+  - [x] 1.2 Update fullState() to include the new collections with empty defaults
+  - [x] 1.3 Verify POST /api/state round-trips the new fields without dropping them (existing endpoint, no code change needed — just confirm via test)
+
+- [x] 2 Expand global navigation from 3 to 10 items
+  - [x] 2.1 Replace NAV array in src/App.jsx with all 10 items (home, timeline, budget, guests, vendors, contracts, seating, inspiration, inbox, ai) each with an icon character
+  - [x] 2.2 Add nav-ico span rendering to each nav-item in the sidebar
+  - [x] 2.3 Add conditional view renders in the main element for all 7 new view ids
+  - [x] 2.4 Add CSS for nav icon alignment to styles.css
+
+- [x] 3 Create SkeletonLoader shared component
+  - [x] 3.1 Create src/components/SkeletonLoader.jsx with configurable lines and height props
+  - [x] 3.2 Add .skeleton-line and shimmer keyframe animation to styles.css
+
+- [x] 4 Upgrade Dashboard (CommandCenter) — Requirement 2
+  - [x] 4.1 Add tasks checklist section to CommandCenter.jsx (right column) reading from data.tasks
+  - [x] 4.2 Implement checkbox toggle that calls persist with updated tasks array
+  - [x] 4.3 Update alert generation logic to cover status='action' payments regardless of due date
+  - [x] 4.4 Add hover reveal of action affordance on alert rows (CSS :hover + inline action button)
+  - [x] 4.5 Add "if no alerts" empty state message
+  - [x] 4.6 Add daily tasks empty state message
+  - [x] 4.7 Restructure layout to 60/40 asymmetric grid (alerts left, tasks right)
+
+- [x] 5 Create Budget view — Requirement 8
+  - [x] 5.1 Create src/views/Budget.jsx with three summary metric cards (Total Budget, Amount Spent, Amount Remaining)
+  - [x] 5.2 Implement BudgetCategory table with columns: Category, Projected, Actual, Due Date, Invoice
+  - [x] 5.3 Implement inline cell editing for projected, actual, and dueDate fields
+  - [x] 5.4 Implement add new BudgetCategory row action
+  - [x] 5.5 Implement real-time recalculation of spent and remaining totals as actuals are edited
+  - [x] 5.6 Add over-budget row alert banner when actual > projected for any category
+  - [x] 5.7 Add total-projected-exceeds-budget warning banner
+  - [x] 5.8 Implement invoice file reference input (filename text field) per row
+  - [x] 5.9 Add Budget.jsx CSS classes to styles.css (.budget-table, .budget-cell-edit, .over-budget-row)
+
+- [x] 6 Create Guests view — Requirement 9
+  - [x] 6.1 Create src/views/Guests.jsx with data grid rendering one row per guest
+  - [x] 6.2 Implement all grid columns: checkbox, Name, RSVP, Meal, Gift, Relationship, Lodging, Transport toggle, Notes
+  - [x] 6.3 Implement inline cell editing with validation (non-empty name check)
+  - [x] 6.4 Implement add new guest row with defaults and auto-focus on Name cell
+  - [x] 6.5 Implement multi-row selection checkboxes and bulk action controls (update RSVP, assign meal)
+  - [x] 6.6 Implement filter controls for RSVP Status and Relationship Category
+  - [x] 6.7 Implement aggregate count bar (total, confirmed, declined, awaiting)
+  - [x] 6.8 Add inline validation error display for empty name submissions
+  - [x] 6.9 Add Guests.jsx CSS classes to styles.css (.guest-grid, .guest-row, .bulk-bar, .filter-bar)
+
+- [x] 7 Expand Vendors view with VendorProfile panel — Requirement 3
+  - [x] 7.1 Create src/views/Vendors.jsx as a grid of vendor cards (extract and enhance from CommandCenter)
+  - [x] 7.2 Each vendor card shows name, category, star rating, paid-vs-total progress bar, next payment due date
+  - [ ] 7.3 Create src/components/VendorProfile.jsx as a fixed slide-over panel (right side, z-index 40)
+  - [x] 7.4 Implement 6-tab navigation inside VendorProfile: Profile, Contract, Emails, Timeline, AI Summary, Open Tasks
+  - [x] 7.5 Profile tab: editable fields (name, category, contact, status, rating) with save action
+  - [x] 7.6 Contract tab: display contractAnalyses[vendor.id] data or a "Scan a contract" prompt linking to Contracts view
+  - [x] 7.7 Emails tab: filter and display inboxThreads where vendorId matches
+  - [x] 7.8 Timeline tab: filter and display timeline events where vendorId matches
+  - [x] 7.9 AI Summary tab: two-column layout showing payment schedule/arrivals (left) and cancellation/overtime (right) from contractAnalyses
+  - [x] 7.10 Open Tasks tab: display and toggle tasks where vendorId matches
+  - [x] 7.11 Add VendorProfile CSS to styles.css (.vendor-panel, .vendor-panel-tabs, .vendor-tab-content)
+
+- [x] 8 Update Contracts view to persist ContractAnalysis — Requirement 4
+  - [x] 8.1 Add vendor selector dropdown to Contracts.jsx (or auto-match by vendorName)
+  - [x] 8.2 When "Save to Plan" is clicked, also write result into data.contractAnalyses[vendorId]
+  - [x] 8.3 Add validation: disable Scan button and show error when text.trim().length < 50
+  - [x] 8.4 Display scannedAt timestamp on saved analyses
+  - [x] 8.5 Implement ContractPrinter utility function (src/utils/contractPrinter.js) that formats a ContractAnalysis to a structured string
+
+    - [ ] 9 Create AI Coordinator view — Requirement 5
+    - [ ] 9.1 Create src/views/AICoordinator.jsx with 40/60 split-pane layout
+    - [ ] 9.2 Left pane: read-only context viewer with tab toggle between Timeline list and Budget table
+    - [ ] 9.3 Right pane: scrollable message list with user messages right-aligned, AI messages left-aligned
+    - [ ] 9.4 Create src/components/MutationBlock.jsx with proposal summary, change list, Approve and Reject buttons
+    - [ ] 9.5 Implement Approve handler: merge rawPatch into relevant state collection and call persist
+    - [ ] 9.6 Implement Reject handler: dismiss MutationBlock, set applied=false, no state change
+    - [ ] 9.7 Fixed chat input at bottom: textarea + submit button, disabled while loading
+    - [ ] 9.8 Show SkeletonLoader in message list while awaiting AI response
+    - [ ] 9.9 Show inline error message on AI request failure (no state mutation)
+    - [ ] 9.10 Add coordinator API client function to src/api.js (POST /api/coordinator)
+    - [ ] 9.11 Create api/coordinator.js Express route handler with system prompt and wedding context injection
+    - [x] 9.12 Add COORDINATOR_SYSTEM and coordinatorUser() to server/prompts.js
+    - [ ] 9.13 Register /api/coordinator route in server/index.js
+    - [ ] 9.14 Add AICoordinator CSS to styles.css (.chat-pane, .chat-msg-user, .chat-msg-ai, .mutation-block)
+
+    - [ ] 10 Create Smart Inbox view — Requirement 6
+    - [ ] 10.1 Create src/views/Inbox.jsx with 35/65 split-pane layout
+    - [ ] 10.2 Left pane: scrollable thread list showing sender, formatted timestamp, tldr per thread
+    - [ ] 10.3 Right pane: full email body of the active thread
+    - [ ] 10.4 AI Impact Banner at top of right pane showing impact and impactLevel badge
+    - [ ] 10.5 Smart Reply area at bottom: pre-populated textarea with thread tldr-derived draft, Send button
+    - [ ] 10.6 Send action appends to thread.replies and calls persist
+    - [ ] 10.7 Empty state: show onboarding prompt when inboxThreads array is empty
+    - [ ] 10.8 Add inbox process API client function to src/api.js (POST /api/inbox/process)
+    - [ ] 10.9 Create api/inbox.js Express route handler for thread TL;DR and impact generation
+    - [ ] 10.10 Add INBOX_SYSTEM and inboxUser() to server/prompts.js
+    - [ ] 10.11 Register /api/inbox/process route in server/index.js
+    - [ ] 10.12 Add Inbox CSS to styles.css (.inbox-thread-list, .inbox-thread-item, .impact-banner, .smart-reply)
+
+    - [ ] 11 Upgrade Timeline with drag-and-drop — Requirement 7
+    - [ ] 11.1 Add draggable={!event.locked} attribute to each tl-item in TimelineView.jsx
+    - [ ] 11.2 Implement onDragStart storing event id in dataTransfer
+    - [ ] 11.3 Implement drop zone rows between events with onDragOver (preventDefault) and onDrop handlers
+    - [ ] 11.4 onDrop calculates new time based on target position and updates the event's time and minutes, then re-sorts and persists
+    - [ ] 11.5 Add conflict detection: compute overlapping pairs (eventA.minutes + eventA.durationMin > eventB.minutes) and render conflict pill above affected nodes
+    - [ ] 11.6 Add "Execute Auto-Fix" button on the conflict pill that invokes runCascade
+    - [ ] 11.7 Show CascadeEngine result as a confirmation step (do not auto-apply) — user must click Apply to confirm
+    - [ ] 11.8 Add drag-handle icon to tl-item and locked indicator badge
+    - [ ] 11.9 Add CSS for drag states to styles.css (.tl-item.dragging, .tl-drop-zone, .conflict-pill)
+
+    - [ ] 12 Create Seating Chart Studio — Requirement 10
+    - [ ] 12.1 Create src/views/Seating.jsx as the container with canvas area + slide-out sidebar toggle
+    - [ ] 12.2 Create src/components/SeatingCanvas.jsx with infinite canvas using CSS transform (pan + zoom)
+    - [ ] 12.3 Implement dot-matrix grid background via CSS background-image radial-gradient
+    - [ ] 12.4 Implement canvas panning via onPointerDown/Move/Up on canvas background
+    - [ ] 12.5 Implement zoom via onWheel updating scale (clamped 0.3–2.0), zooming toward cursor
+    - [ ] 12.6 Create src/components/SeatingTable.jsx: renders round or rect table shape, shows label and capacity, uses pointer capture for drag movement
+    - [ ] 12.7 Implement SeatingTable drag: onPointerDown sets dragging state, onPointerMove updates x/y in local preview, onPointerUp commits to state via persist
+    - [ ] 12.8 Create src/components/GuestBadge.jsx: draggable pill showing guest name inside a SeatingTable
+    - [ ] 12.9 Implement GuestBadge cross-table drag using HTML5 Drag API; SeatingTable onDrop updates guestIds arrays on both old and new table
+    - [ ] 12.10 Implement duplicate assignment detection: if guestId appears in >1 table, show conflict indicator on both badges
+    - [ ] 12.11 Add Add Table controls (round / rect buttons) in Seating.jsx toolbar; new table appended to seatingTables and persisted
+    - [ ] 12.12 Add seating AI Analysis sidebar (slide-out panel) showing violation alerts from /api/seating-analysis
+    - [ ] 12.13 Implement alert highlight: clicking an alert sets a highlightedId in state, which adds a highlight CSS class to the corresponding table or badge
+    - [ ] 12.14 Implement printable export: window.print() on a print-specific CSS media query that shows only the canvas
+    - [ ] 12.15 Add seating AI client function to src/api.js (POST /api/seating-analysis)
+    - [ ] 12.16 Create api/seating.js route handler for seating violation analysis
+    - [ ] 12.17 Add SEATING_SYSTEM and seatingUser() to server/prompts.js
+    - [ ] 12.18 Register /api/seating-analysis route in server/index.js
+    - [ ] 12.19 Add Seating CSS to styles.css (.canvas-viewport, .canvas-world, .seating-table, .seating-table.round, .seating-table.rect, .guest-badge, .guest-badge.conflict, .canvas-toolbar, .seating-sidebar)
+
+    - [ ] 13 Persistence and error handling — Requirement 11 & 12
+    - [ ] 13.1 Update persist() in App.jsx to catch saveState failures and set a saveError flag
+    - [ ] 13.2 Add toast notification component (fixed bottom-right) that appears when saveError is set, auto-dismisses after 5s
+    - [ ] 13.3 Show offlineWarning banner when getState returns persisted=false at load time
+    - [ ] 13.4 Add .toast CSS class to styles.css
+
+    - [ ] 14 Write property-based tests — Correctness Properties
+    - [ ] 14.1 Install fast-check and vitest as dev dependencies
+    - [ ] 14.2 Configure vitest in vite.config.js
+    - [ ] 14.3 Property 1: active nav item has active class (fc generates nav id, check rendered class)
+    - [ ] 14.4 Property 2: alert rows for all triggering payments (fc generates payments array, check alert count)
+    - [ ] 14.5 Property 3: task checked state round-trip (fc generates task, toggle, verify state)
+    - [ ] 14.6 Property 4: countdown displays correct day difference (fc generates date strings, check math)
+    - [ ] 14.7 Property 5: vendor tab content filtered by vendorId (fc generates multi-vendor state, check tab renders)
+    - [ ] 14.8 Property 6: vendor profile edit round-trip (fc generates vendor + field update, check state)
+    - [ ] 14.9 Property 7: contract validation rejects short input (fc generates strings len < 50, check no API call)
+    - [ ] 14.10 Property 8: contract analysis association round-trip (fc generates analysis result + vendorId, check state)
+    - [ ] 14.11 Property 9: ContractAnalysis serialization round-trip (fc generates ContractAnalysis, print then parse, deep equal)
+    - [ ] 14.12 Property 10: AI message alignment by role (fc generates message list, check css classes)
+    - [ ] 14.13 Property 11: MutationBlock rendered for proposals (fc generates messages with/without proposals, check render)
+    - [ ] 14.14 Property 12: mutation approve applies changes; reject leaves state unchanged (fc generates proposals, check both paths)
+    - [ ] 14.15 Property 13: failed AI request does not mutate state (fc generates state, simulate error, deep equal check)
+    - [ ] 14.16 Property 14: InboxThread list item contains required fields (fc generates threads, check rendered output)
+    - [ ] 14.17 Property 15: thread impact banner reflects impact field (fc generates threads with impact, check render)
+    - [ ] 14.18 Property 16: reply send round-trip (fc generates thread + reply text, check replies array)
+    - [ ] 14.19 Property 17: inbox processing produces non-empty tldr and impact (fc generates email bodies, check response)
+    - [ ] 14.20 Property 18: locked events not draggable (fc generates events with locked flag, check draggable attr)
+    - [ ] 14.21 Property 19: timeline sorted after drag (fc generates timeline + drag operation, check sort order)
+    - [ ] 14.22 Property 20: overlapping events produce conflict indicators (fc generates overlapping event pairs, check indicators)
+    - [ ] 14.23 Property 21: budget table has one row per category (fc generates category arrays, check row count)
+    - [ ] 14.24 Property 22: over-budget alert for exceeded categories (fc generates categories where actual > projected, check alerts)
+    - [ ] 14.25 Property 23: budget totals are always arithmetically correct (fc generates category arrays, check sum math)
+    - [ ] 14.26 Property 24: total projected over budget triggers warning (fc generates states, check warning condition)
+    - [ ] 14.27 Property 25: guest grid has one row per guest (fc generates guest arrays, check row count)
+    - [ ] 14.28 Property 26: guest aggregate counts are always correct (fc generates guest arrays, check counts)
+    - [ ] 14.29 Property 27: guest filter does not destroy underlying data (fc generates guests + filter, check state unchanged)
+    - [ ] 14.30 Property 28: empty guest name is rejected (fc generates empty/whitespace names, check validation)
+    - [ ] 14.31 Property 29: guest appears in exactly one table (fc generates seating state, check guestId uniqueness)
+    - [ ] 14.32 Property 30: SeatingTable position persisted after drag (fc generates drag operations, check x/y in state)
+    - [ ] 14.33 Property 31: SkeletonLoader shown during loading replaced on completion (fc generates loading states, check render)
+    - [ ] 14.34 Property 32: invalid form submission shows errors and blocks API call (fc generates invalid inputs, check validation)

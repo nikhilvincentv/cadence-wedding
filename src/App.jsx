@@ -4,11 +4,22 @@ import { getStatus, getState, saveState, daysUntil } from './api.js'
 import CommandCenter from './views/CommandCenter.jsx'
 import TimelineView from './views/TimelineView.jsx'
 import Contracts from './views/Contracts.jsx'
+import Budget from './views/Budget.jsx'
+import Guests from './views/Guests.jsx'
+import AICoordinator from './views/AICoordinator.jsx'
+import Vendors from './views/Vendors.jsx'
 
 const NAV = [
-  { id: 'home', label: 'Command Center' },
-  { id: 'timeline', label: 'Timeline & Cascade' },
-  { id: 'contracts', label: 'Contract Intel' },
+  { id: 'home',        label: 'Dashboard',       icon: '⌂' },
+  { id: 'timeline',    label: 'Timeline',         icon: '◷' },
+  { id: 'budget',      label: 'Budget',           icon: '₿' },
+  { id: 'guests',      label: 'Guests',           icon: '♡' },
+  { id: 'vendors',     label: 'Vendors',          icon: '◈' },
+  { id: 'contracts',   label: 'Contracts',        icon: '✦' },
+  { id: 'seating',     label: 'Seating',          icon: '⊞' },
+  { id: 'inspiration', label: 'Inspiration',      icon: '✧' },
+  { id: 'inbox',       label: 'Inbox',            icon: '✉' },
+  { id: 'ai',          label: 'AI Coordinator',   icon: '◉' },
 ]
 
 export default function App() {
@@ -56,6 +67,7 @@ export default function App() {
         </div>
         {NAV.map((n) => (
           <div key={n.id} className={`nav-item ${view === n.id ? 'active' : ''}`} onClick={() => setView(n.id)}>
+            <span className="nav-ico">{n.icon}</span>
             {n.label}
           </div>
         ))}
@@ -87,6 +99,27 @@ export default function App() {
         )}
         {view === 'contracts' && (
           <Contracts data={data} persist={persist} live={live} />
+        )}
+        {view === 'budget' && (
+          <Budget data={data} persist={persist} />
+        )}
+        {view === 'guests' && (
+          <Guests data={data} persist={persist} />
+        )}
+        {view === 'vendors' && (
+          <Vendors data={data} persist={persist} setView={setView} />
+        )}
+        {view === 'seating' && (
+          <div className="view-placeholder">Seating — coming soon</div>
+        )}
+        {view === 'inspiration' && (
+          <div className="view-placeholder">Inspiration — coming soon</div>
+        )}
+        {view === 'inbox' && (
+          <div className="view-placeholder">Inbox — coming soon</div>
+        )}
+        {view === 'ai' && (
+          <AICoordinator data={data} persist={persist} status={status} />
         )}
       </main>
     </div>
