@@ -892,3 +892,13 @@ select.field { appearance: none; }
 .palette-title { font-size: 14px; font-weight: 600; }
 .palette-sub { font-size: 12px; color: var(--ink-dim); margin-top: 1px; }
 .palette-foot { display: flex; justify-content: space-between; padding: 10px 16px; border-top: 1px solid var(--line-soft); font-size: 11px; color: var(--ink-faint); }
+
+.venue-map { height: 480px; width: 100%; background: var(--bg-2); }
+.venue-map .leaflet-container { background: var(--bg-2); }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--bg-1); color: var(--ink); }
+.leaflet-popup-content { font-family: var(--sans); font-size: 13px; }
+.nearby-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line-soft); }
+.nearby-row:last-child { border-bottom: none; }
+.nearby-name { font-size: 13.5px; font-weight: 600; }
+.nearby-link { color: var(--cyan); text-decoration: none; }
+.nearby-link:hover { text-decoration: underline; }

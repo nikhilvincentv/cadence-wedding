@@ -10,6 +10,7 @@ import AICoordinator from './views/AICoordinator.jsx'
 import Vendors from './views/Vendors.jsx'
 import Seating from './views/Seating.jsx'
 import SearchPalette from './components/SearchPalette.jsx'
+import Venue from './views/Venue.jsx'
 
 const NAV = [
   { id: 'home',        label: 'Dashboard',       icon: '⌂' },
@@ -19,6 +20,7 @@ const NAV = [
   { id: 'vendors',     label: 'Vendors',          icon: '◈' },
   { id: 'contracts',   label: 'Contracts',        icon: '✦' },
   { id: 'seating',     label: 'Seating',          icon: '⊞' },
+  { id: 'venue',       label: 'Venue & Nearby',   icon: '⌖' },
   { id: 'inspiration', label: 'Inspiration',      icon: '✧' },
   { id: 'inbox',       label: 'Inbox',            icon: '✉' },
   { id: 'ai',          label: 'AI Coordinator',   icon: '◉' },
@@ -130,6 +132,9 @@ export default function App() {
         )}
         {view === 'seating' && (
           <Seating data={data} persist={persist} live={live} />
+        )}
+        {view === 'venue' && (
+          <Venue data={data} persist={persist} />
         )}
         {view === 'inspiration' && (
           <div className="view-placeholder">Inspiration — coming soon</div>

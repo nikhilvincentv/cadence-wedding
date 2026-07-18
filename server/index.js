@@ -10,6 +10,7 @@ import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser, SEATING_SYS
 import { cascadeFallback, contractFallback, seatingFallback } from './fallback.js'
 import { getUserState, saveUserState } from './db.js'
 import { reindexUser, searchUser, buildDocs, typesenseEnabled } from './typesense.js'
+import { findNearby } from './places.js'
 
 const app = express()
 app.use(cors())
@@ -63,6 +64,16 @@ app.post('/api/cascade', async (req, res) => {
     return res.json({ ...result, source: 'model' })
   } catch (err) {
     return res.json({ ...cascadeFallback(change), source: 'demo', note: String(err.message || err) })
+  }
+})
+
+app.get('/api/places', async (req, res) => {
+  const venue = req.query.venue
+  if (!venue) return res.status(400).json({ error: 'Missing venue.' })
+  try {
+    res.json(await findNearby(String(venue)))
+  } catch (err) {
+    res.status(200).json({ error: 'Map service is busy right now. Try again in a moment.', detail: String(err.message || err) })
   }
 })
 

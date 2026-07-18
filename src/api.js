@@ -34,6 +34,11 @@ export const runCascade = (body) =>
     .then(j)
     .catch(() => ({ ...cascadeFallback(body.change), source: 'demo' }))
 
+export const findNearbyVendors = (venue) =>
+  fetch(`/api/places?venue=${encodeURIComponent(venue)}`)
+    .then(j)
+    .catch(() => ({ error: 'Could not reach the map service.' }))
+
 export const reindexSearch = (userId, data) =>
   fetch('/api/search', {
     method: 'POST',
