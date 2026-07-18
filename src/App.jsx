@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { UserButton } from '@clerk/clerk-react'
-import { getStatus, getWedding, daysUntil } from './api.js'
+import { UserButton, useUser } from '@clerk/clerk-react'
+import { getStatus, getState, saveState, daysUntil } from './api.js'
 import CommandCenter from './views/CommandCenter.jsx'
 import TimelineView from './views/TimelineView.jsx'
 import Contracts from './views/Contracts.jsx'
@@ -12,31 +12,44 @@ const NAV = [
 ]
 
 export default function App() {
+  const { isLoaded, user } = useUser()
+  const userId = user?.id
   const [view, setView] = useState('home')
   const [status, setStatus] = useState(null)
-  const [state, setState] = useState(null)
-  const [extraPayments, setExtraPayments] = useState([])
-  const [timeline, setTimeline] = useState(null)
+  const [data, setData] = useState(null)
 
   useEffect(() => {
     getStatus().then(setStatus).catch(() => setStatus({ enabled: false, model: 'demo', provider: 'built-in' }))
-    getWedding().then((s) => {
-      setState(s)
-      setTimeline(s.timeline)
-    })
   }, [])
 
-  if (!state) {
+  useEffect(() => {
+    if (!isLoaded || !userId) return
+    getState(userId).then(setData)
+  }, [isLoaded, userId])
+
+  if (!data) {
     return (
       <div style={{ display: 'grid', placeItems: 'center', height: '100vh' }}>
-        <div className="row"><span className="spin" /> <span className="muted">Loading Cadence...</span></div>
+        <div className="row"><span className="spin" /> <span className="muted">Loading your wedding...</span></div>
       </div>
     )
   }
 
   const live = status?.enabled
-  const days = daysUntil(state.wedding.date)
-  const allPayments = [...state.payments, ...extraPayments]
+  const days = daysUntil(data.wedding.date)
+
+  function persist(next) {
+    setData(next)
+    saveState(userId, next)
+  }
+
+  function addPayments(pays) {
+    persist({ ...data, payments: [...data.payments, ...pays] })
+  }
+
+  function setTimeline(timeline) {
+    persist({ ...data, timeline })
+  }
 
   return (
     <div className="app">
@@ -59,9 +72,13 @@ export default function App() {
             <span className="dot" />
             {live ? `Live · ${status.model}` : 'Demo mode · built-in reasoner'}
           </div>
+          <div className={`aipill ${data.persisted ? 'live' : 'demo'}`} style={{ marginTop: 8 }}>
+            <span className="dot" />
+            {data.persisted ? 'Saved to your account' : 'Not saved (offline)'}
+          </div>
           <div className="row between" style={{ marginTop: 12 }}>
             <div className="faint" style={{ fontSize: 11, lineHeight: 1.5 }}>
-              {state.wedding.couple} · {days} days out
+              {data.wedding.couple} · {days} days out
             </div>
             <UserButton afterSignOutUrl="/" />
           </div>
@@ -70,22 +87,13 @@ export default function App() {
 
       <main className="main">
         {view === 'home' && (
-          <CommandCenter state={state} payments={allPayments} status={status} goto={setView} days={days} />
+          <CommandCenter state={data} payments={data.payments} status={status} goto={setView} days={days} />
         )}
         {view === 'timeline' && (
-          <TimelineView
-            state={state}
-            timeline={timeline}
-            setTimeline={setTimeline}
-            live={live}
-          />
+          <TimelineView state={data} timeline={data.timeline} setTimeline={setTimeline} live={live} />
         )}
         {view === 'contracts' && (
-          <Contracts
-            state={state}
-            live={live}
-            onExtracted={(pays) => setExtraPayments((p) => [...p, ...pays])}
-          />
+          <Contracts state={data} live={live} onExtracted={addPayments} />
         )}
       </main>
     </div>

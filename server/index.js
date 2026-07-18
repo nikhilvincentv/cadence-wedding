@@ -8,6 +8,7 @@ import { fullState } from './data.js'
 import { aiStatus, chatJSON } from './ai.js'
 import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser } from './prompts.js'
 import { cascadeFallback, contractFallback } from './fallback.js'
+import { getUserState, saveUserState } from './db.js'
 
 const app = express()
 app.use(cors())
@@ -18,6 +19,24 @@ const PORT = process.env.PORT || 8787
 app.get('/api/status', (_req, res) => res.json(aiStatus()))
 
 app.get('/api/wedding', (_req, res) => res.json(fullState()))
+
+app.get('/api/state', async (req, res) => {
+  const userId = req.header('x-user-id') || 'demo-user'
+  try {
+    res.json(await getUserState(userId))
+  } catch (err) {
+    res.status(200).json({ ...fullState(), persisted: false, dbError: String(err.message || err) })
+  }
+})
+
+app.post('/api/state', async (req, res) => {
+  const userId = req.header('x-user-id') || 'demo-user'
+  try {
+    res.json(await saveUserState(userId, req.body || {}))
+  } catch (err) {
+    res.status(500).json({ ok: false, error: String(err.message || err) })
+  }
+})
 
 app.post('/api/cascade', async (req, res) => {
   const { change, timeline, vendors, wedding } = req.body || {}
