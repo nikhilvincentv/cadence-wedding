@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useUser, useClerk } from '@clerk/clerk-react'
-import { getStatus, getState, saveState, daysUntil } from './api.js'
+import { getStatus, getState, saveState, daysUntil, generatePlan } from './api.js'
 import Onboarding from './Onboarding.jsx'
 import CommandCenter from './views/CommandCenter.jsx'
 import TimelineView from './views/TimelineView.jsx'
@@ -36,6 +36,8 @@ export default function App() {
   const [status, setStatus] = useState(null)
   const [data, setData] = useState(null)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [buildingPlan, setBuildingPlan] = useState(false)
+  const plannedRef = useRef(false)
 
   useEffect(() => {
     getStatus().then(setStatus).catch(() => setStatus({ enabled: false, model: 'demo', provider: 'built-in' }))
@@ -58,6 +60,33 @@ export default function App() {
     if (!isLoaded || !userId) return
     getState(userId).then(setData)
   }, [isLoaded, userId])
+
+  // After onboarding, auto-build a starter plan (tasks, vendors, timeline, budget) with AI
+  useEffect(() => {
+    if (!data) return
+    const planEmpty = !(data.tasks && data.tasks.length) && !(data.vendors && data.vendors.length) && !(data.budgetCategories && data.budgetCategories.length)
+    if (!data.completedOnboarding || !data.wedding?.couple || !planEmpty || plannedRef.current) return
+    plannedRef.current = true
+    setBuildingPlan(true)
+    const uid = () => Math.random().toString(36).slice(2, 9)
+    const pm = (t) => {
+      const m = String(t || '').match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i)
+      if (!m) return 0
+      let h = Number(m[1]) % 12
+      if (m[3] && m[3].toUpperCase() === 'PM') h += 12
+      return h * 60 + Number(m[2])
+    }
+    generatePlan(data.wedding, data.profile)
+      .then((plan) => {
+        const tasks = (plan.tasks || []).map((d) => ({ id: uid(), checked: false, description: typeof d === 'string' ? d : d.description || d.title || '' }))
+        const vendors = (plan.vendors || []).map((v) => ({ id: uid(), name: v.name || 'Vendor', category: v.category || '', contact: '', status: 'pending', rating: null }))
+        const timeline = (plan.timeline || []).map((e) => ({ id: uid(), time: e.time || '12:00 PM', minutes: pm(e.time), title: e.title || 'Event', vendorId: '', durationMin: Number(e.durationMin) || 30, locked: false, note: '' }))
+        const budgetCategories = (plan.budgetCategories || []).map((c) => ({ id: uid(), name: c.name || 'Category', projected: Number(c.projected) || 0, actual: 0 }))
+        persist({ ...data, tasks, vendors, timeline, budgetCategories })
+        setBuildingPlan(false)
+      })
+      .catch(() => setBuildingPlan(false))
+  }, [data])
 
   if (!data) {
     return (
@@ -131,6 +160,12 @@ export default function App() {
       </aside>
 
       <main className="main">
+        {buildingPlan && (
+          <div className="card pad-lg" style={{ marginBottom: 18, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span className="spin" />
+            <span className="muted">Cadence is building your starter plan — tasks, vendors, timeline, and budget…</span>
+          </div>
+        )}
         {view === 'home' && (
           <CommandCenter data={data} persist={persist} status={status} goto={setView} days={days} />
         )}
