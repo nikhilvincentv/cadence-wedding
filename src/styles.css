@@ -21,6 +21,7 @@
   --serif: 'Playfair Display', Georgia, serif;
   --sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --logo: 'Archivo Black', var(--sans);
 }
 
 * { box-sizing: border-box; }
@@ -49,10 +50,11 @@ body {
   width: 34px; height: 34px; border-radius: 10px; flex: none;
   background: linear-gradient(140deg, var(--rose), var(--rose-deep));
   display: grid; place-items: center; color: #fff; font-weight: 700;
-  font-family: var(--serif); font-size: 20px; box-shadow: 0 6px 18px -6px rgba(124,84,84,0.45);
+  font-family: var(--logo); font-size: 18px; box-shadow: 0 6px 18px -6px rgba(124,84,84,0.45);
 }
-.brand-name { font-family: var(--serif); font-size: 22px; font-weight: 600; letter-spacing: 0.2px; }
+.brand-name { font-family: var(--logo); font-size: 19px; font-weight: 400; letter-spacing: 0.2px; }
 .brand-sub { font-size: 10.5px; color: var(--ink-faint); letter-spacing: 2px; text-transform: uppercase; margin-top: 1px; }
+.brand-ai { color: var(--rose-deep); }
 
 .nav-item {
   display: flex; align-items: center; gap: 12px; padding: 11px 13px; border-radius: 999px;
@@ -227,10 +229,10 @@ h1.page { font-family: var(--serif); font-size: 34px; font-weight: 600; margin: 
 .login-mark {
   width: 60px; height: 60px; border-radius: 16px;
   background: linear-gradient(140deg, var(--rose), var(--rose-deep));
-  display: grid; place-items: center; color: #fff; font-weight: 700;
-  font-family: var(--serif); font-size: 34px; box-shadow: 0 10px 30px -10px rgba(124,84,84,0.5);
+  display: grid; place-items: center; color: #fff; font-weight: 400;
+  font-family: var(--logo); font-size: 30px; box-shadow: 0 10px 30px -10px rgba(124,84,84,0.5);
 }
-.login-name { font-family: var(--serif); font-size: 44px; font-weight: 600; margin-top: 22px; }
+.login-name { font-family: var(--logo); font-size: 38px; font-weight: 400; margin-top: 22px; letter-spacing: 0.3px; }
 .login-sub { font-size: 12px; color: var(--ink-faint); letter-spacing: 3px; text-transform: uppercase; margin-top: 4px; }
 .login-tag { font-family: var(--serif); font-size: 24px; color: var(--ink-dim); margin-top: 30px; line-height: 1.45; }
 .login-tag span { color: var(--ink); }

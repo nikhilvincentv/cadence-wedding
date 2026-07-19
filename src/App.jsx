@@ -122,7 +122,7 @@ export default function App() {
         <div className="brand">
           <div className="brand-mark">A</div>
           <div>
-            <div className="brand-name">AIsle</div>
+            <div className="brand-name"><span className="brand-ai">AI</span>sle</div>
             <div className="brand-sub">Wedding OS</div>
           </div>
         </div>
