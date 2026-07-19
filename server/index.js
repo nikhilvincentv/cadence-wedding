@@ -10,8 +10,6 @@ import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser, SEATING_SYS
 import { cascadeFallback, contractFallback, seatingFallback, emailFallback, planFallback } from './fallback.js'
 import { coordinatorHandler } from '../api/coordinator.js'
 import { getUserState, saveUserState } from './db.js'
-import { reindexUser, searchUser, buildDocs, typesenseEnabled } from './typesense.js'
-import { findNearby } from './places.js'
 
 const app = express()
 app.use(cors())
@@ -155,6 +153,9 @@ app.post('/api/contract', async (req, res) => {
     return res.json({ ...contractFallback(text), source: 'demo', note: String(err.message || err) })
   }
 })
+
+app.use('/api/coordinator', coordinatorRouter)
+
 
 const dist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist')
 if (existsSync(dist)) {

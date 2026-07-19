@@ -8,6 +8,7 @@ import Contracts from './views/Contracts.jsx'
 import Budget from './views/Budget.jsx'
 import Guests from './views/Guests.jsx'
 import AICoordinator from './views/AICoordinator.jsx'
+import Inbox from './views/Inbox.jsx'
 import Vendors from './views/Vendors.jsx'
 import VendorWorkspace from './views/VendorWorkspace.jsx'
 import Seating from './views/Seating.jsx'
@@ -189,7 +190,7 @@ export default function App() {
           <Inspiration data={data} persist={persist} />
         )}
         {view === 'inbox' && (
-          <Inbox data={data} persist={persist} live={live} />
+          <div className="view-placeholder">Inbox — coming soon</div>
         )}
         {view === 'ai' && (
           <AICoordinator data={data} persist={persist} status={status} />

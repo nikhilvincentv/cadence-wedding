@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MutationBlock from '../components/MutationBlock';
+import SkeletonLoader from '../components/SkeletonLoader';
 import { coordinatorChat } from '../api';
 
 export default function AICoordinator({ data, persist }) {
@@ -10,6 +11,7 @@ export default function AICoordinator({ data, persist }) {
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const chatEndRef = useRef(null);
+  const [aiError, setAiError] = useState(null); // New state for AI errors
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -22,13 +24,20 @@ export default function AICoordinator({ data, persist }) {
     setInputText('');
     setMessages((prev) => [...prev, { role: 'user', text }]);
     setIsLoading(true);
+    setAiError(null); // Clear previous errors
 
-    const { wedding, vendors, timeline, budgetCategories, guests, payments } = data;
-    const result = await coordinatorChat(text, { wedding, vendors, timeline, budgetCategories, guests, payments });
+    try {
+      const { wedding, vendors, timeline, budgetCategories, guests, payments } = data;
+      const result = await coordinatorChat(text, { wedding, vendors, timeline, budgetCategories, guests, payments });
 
-    setMessages((prev) => [...prev, { role: 'ai', text: result.reply }]);
-    if (result.proposal) setPendingProposal(result.proposal);
-    setIsLoading(false);
+      setMessages((prev) => [...prev, { role: 'ai', text: result.reply }]);
+      if (result.proposal) setPendingProposal(result.proposal);
+    } catch (error) {
+      console.error("AI Coordinator error:", error);
+      setAiError('Failed to get a response from AI. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -55,6 +64,7 @@ export default function AICoordinator({ data, persist }) {
     setPendingProposal(null);
     setMessages((prev) => [...prev, { role: 'ai', text: 'No problem, the change was discarded.' }]);
   };
+  };
 
   return (
     <div className="ai-coordinator-view">
@@ -79,8 +89,17 @@ export default function AICoordinator({ data, persist }) {
               onReject={handleReject}
             />
           )}
-
           <div ref={chatEndRef} />
+          {isLoading && (
+            <div className="chat-msg chat-msg-ai">
+              <SkeletonLoader lines={3} />
+            </div>
+          )}
+          {aiError && (
+            <div className="chat-msg chat-msg-ai error-message" style={{ color: 'var(--red)', alignSelf: 'center' }}>
+              <p>{aiError}</p>
+            </div>
+          )}
         </div>
 
         <div className="chat-input-area" style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
