@@ -185,7 +185,7 @@ export default function App() {
           <VenueFinder data={data} persist={persist} setView={setView} />
         )}
         {view === 'inbox' && (
-          <div className="view-placeholder">Inbox — coming soon</div>
+          <Inbox data={data} persist={persist} live={live} />
         )}
         {view === 'ai' && (
           <AICoordinator data={data} persist={persist} status={status} />

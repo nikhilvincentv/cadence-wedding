@@ -56,6 +56,7 @@ export function emptyState() {
     contractAnalyses: {},
     recommendations: { venues: [], categories: {} },
     negotiations: {},
+    connections: { gmail: { connected: false, address: '' }, sms: { connected: false, number: '' } },
     ...emptyOnboarding(),
     completedOnboarding: false,
   }
