@@ -3,9 +3,9 @@ import MutationBlock from '../components/MutationBlock';
 import SkeletonLoader from '../components/SkeletonLoader';
 import { coordinatorChat } from '../api';
 
-export default function AICoordinator({ data, persist }) {
+export default function AICoordinator({ data, persist, userId }) {
   const [messages, setMessages] = useState([
-    { role: 'ai', text: "Hi! I have access to your full wedding plan. Ask me anything or let me know what you'd like to change." }
+    { role: 'ai', text: "Hi! I have access to your full wedding plan and can pull live details from your saved data — contracts, emails, negotiations, anything on file. Ask me anything or let me know what you'd like to change." }
   ]);
   const [pendingProposal, setPendingProposal] = useState(null);
   const [inputText, setInputText] = useState('');
@@ -28,7 +28,7 @@ export default function AICoordinator({ data, persist }) {
 
     try {
       const { wedding, vendors, timeline, budgetCategories, guests, payments } = data;
-      const result = await coordinatorChat(text, { wedding, vendors, timeline, budgetCategories, guests, payments });
+      const result = await coordinatorChat(text, { wedding, vendors, timeline, budgetCategories, guests, payments }, userId);
 
       setMessages((prev) => [...prev, { role: 'ai', text: result.reply }]);
       if (result.proposal) setPendingProposal(result.proposal);

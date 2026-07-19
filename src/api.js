@@ -96,10 +96,10 @@ export const runSeating = (body) =>
     body: JSON.stringify(body),
   }).then(j)
 
-export const coordinatorChat = (message, data) =>
+export const coordinatorChat = (message, data, userId) =>
   fetch('/api/coordinator', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-user-id': userId || 'demo-user' },
     body: JSON.stringify({ message, ...data }),
   })
     .then(j)

@@ -457,6 +457,75 @@ export function emailFallback(email = {}) {
   }
 }
 
+// Offline coordinator reply: answers common questions straight from the couple's
+// saved Neon data when no AI key is configured, instead of a generic canned line.
+export function coordinatorFallback(message = '', state = null) {
+  const m = message.toLowerCase()
+  const s = state || {}
+  const wedding = s.wedding || {}
+  const payments = s.payments || []
+  const guests = s.guests || []
+  const vendors = s.vendors || []
+  const timeline = s.timeline || []
+
+  if (/budget|spend|spent|cost|left|remaining/.test(m) && (wedding.budgetTotal || payments.length)) {
+    const total = Number(wedding.budgetTotal) || 0
+    const spent =
+      Number(wedding.budgetSpent) ||
+      payments.reduce((sum, p) => sum + (p.paid ? Number(p.amount) || 0 : 0), 0)
+    return {
+      reply: `Your budget is $${total.toLocaleString('en-US')} total, with about $${spent.toLocaleString(
+        'en-US'
+      )} spent so far — roughly $${Math.max(0, total - spent).toLocaleString('en-US')} remaining. (Offline estimate from your saved data — connect an AI key for deeper analysis.)`,
+      proposal: null,
+    }
+  }
+
+  if (/payment|due|owe|balance|deposit/.test(m) && payments.length) {
+    const unpaid = payments.filter((p) => p.status !== 'paid' && p.dueDate)
+    const upcoming = [...unpaid].sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0]
+    if (upcoming)
+      return {
+        reply: `Your next payment on file is "${upcoming.label || upcoming.vendor || 'a vendor payment'}" for $${Number(
+          upcoming.amount || 0
+        ).toLocaleString('en-US')}, due ${upcoming.dueDate}.`,
+        proposal: null,
+      }
+  }
+
+  if (/guest|rsvp/.test(m) && guests.length) {
+    const confirmed = guests.filter((g) => g.rsvp === 'confirmed').length
+    const awaiting = guests.filter((g) => g.rsvp === 'awaiting').length
+    return {
+      reply: `You have ${guests.length} guests on file: ${confirmed} confirmed, ${awaiting} awaiting response.`,
+      proposal: null,
+    }
+  }
+
+  if (/vendor/.test(m) && vendors.length) {
+    const booked = vendors.filter((v) => v.status === 'booked').length
+    return {
+      reply: `You have ${vendors.length} vendors tracked, ${booked} booked so far.`,
+      proposal: null,
+    }
+  }
+
+  if (/timeline|schedule|agenda|first|starts?/.test(m) && timeline.length) {
+    const first = timeline[0]
+    return {
+      reply: `Your day-of timeline starts with "${first.title}" at ${first.time || 'TBD'}.`,
+      proposal: null,
+    }
+  }
+
+  return {
+    reply: `I'm currently running in offline mode. Your message was: "${message.slice(0, 80)}${
+      message.length > 80 ? '…' : ''
+    }". I can't generate a live response right now, but your data is safe.`,
+    proposal: null,
+  }
+}
+
 export function seatingFallback({ guests = [], tables = [] }) {
   const order = { family: 0, friends: 1, coworkers: 2, other: 3 }
   const sorted = [...guests].sort((a, b) => (order[a.relationship] ?? 9) - (order[b.relationship] ?? 9))

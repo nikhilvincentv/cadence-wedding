@@ -188,7 +188,7 @@ export default function App() {
           <div className="view-placeholder">Inbox — coming soon</div>
         )}
         {view === 'ai' && (
-          <AICoordinator data={data} persist={persist} status={status} />
+          <AICoordinator data={data} persist={persist} status={status} userId={userId} />
         )}
       </main>
 
