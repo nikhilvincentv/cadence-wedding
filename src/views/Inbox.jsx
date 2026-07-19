@@ -15,7 +15,7 @@ function fmtTime(ts) {
 }
 
 export default function Inbox({ data, persist }) {
-  const conns = data.connections || { gmail: { connected: false }, sms: { connected: false } }
+  const conns = data.connections || { gmail: { connected: false }, sms: { connected: false }, autopilot: false, muted: {} }
   const gmailOn = conns.gmail?.connected
   const smsOn = conns.sms?.connected
   const anyOn = gmailOn || smsOn
@@ -82,9 +82,21 @@ export default function Inbox({ data, persist }) {
           </div>
         </div>
         {anyOn && (
-          <div className="row gap-sm wrap">
-            {gmailOn && <span className="badge ok" style={{ fontSize: 11 }}>✉️ {conns.gmail.address}</span>}
-            {smsOn && <span className="badge ok" style={{ fontSize: 11 }}>💬 {conns.sms.number}</span>}
+          <div className="row gap-sm wrap" style={{ alignItems: 'center' }}>
+            <label className="row gap-sm" style={{ cursor: 'pointer', fontSize: 13, fontWeight: 600, marginRight: 12 }}>
+              <input type="checkbox" checked={conns.autopilot} onChange={(e) => saveConns({ autopilot: e.target.checked })} />
+              Autopilot (Unrestricted)
+            </label>
+            {gmailOn ? (
+              <span className="badge ok" style={{ fontSize: 11 }}>{conns.gmail.address}</span>
+            ) : (
+              <button className="btn ghost sm" onClick={() => setModal('gmail')}>+ Connect Gmail</button>
+            )}
+            {smsOn ? (
+              <span className="badge ok" style={{ fontSize: 11 }}>{conns.sms.number}</span>
+            ) : (
+              <button className="btn ghost sm" onClick={() => setModal('sms')}>+ Link Phone</button>
+            )}
           </div>
         )}
       </div>
@@ -92,7 +104,6 @@ export default function Inbox({ data, persist }) {
       {!anyOn ? (
         <div className="grid cols-2">
           <div className="card pad-lg">
-            <div style={{ fontSize: 26, marginBottom: 10 }}>✉️</div>
             <div style={{ fontSize: 17, fontWeight: 700 }}>Connect Gmail</div>
             <div className="faint" style={{ fontSize: 13, margin: '6px 0 14px' }}>
               Let the agent read vendor emails and send replies from your inbox.
@@ -100,7 +111,6 @@ export default function Inbox({ data, persist }) {
             <button className="btn primary" onClick={() => setModal('gmail')}>Connect Gmail</button>
           </div>
           <div className="card pad-lg">
-            <div style={{ fontSize: 26, marginBottom: 10 }}>💬</div>
             <div style={{ fontSize: 17, fontWeight: 700 }}>Link your phone</div>
             <div className="faint" style={{ fontSize: 13, margin: '6px 0 14px' }}>
               Get a dedicated wedding number so the agent can text vendors and you see every reply.
@@ -116,7 +126,7 @@ export default function Inbox({ data, persist }) {
               {gmailOn && <button className={`chip ${filter === 'email' ? 'on' : ''}`} onClick={() => setFilter('email')}>Email</button>}
               {smsOn && <button className={`chip ${filter === 'sms' ? 'on' : ''}`} onClick={() => setFilter('sms')}>Texts</button>}
             </div>
-            <span className="badge low" style={{ fontSize: 11 }}>◉ Agent active · handling replies</span>
+            <span className="badge low" style={{ fontSize: 11 }}>Agent active · handling replies</span>
           </div>
 
           <div className="grid" style={{ gridTemplateColumns: '320px 1fr', gap: 16, alignItems: 'start' }}>
@@ -138,7 +148,7 @@ export default function Inbox({ data, persist }) {
                   >
                     <div className="row between" style={{ gap: 8 }}>
                       <span style={{ fontSize: 13.5, fontWeight: t.unread ? 700 : 600, color: 'var(--ink)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {t.channel === 'sms' ? '💬 ' : '✉️ '}{t.vendorName}
+                        {t.channel === 'sms' ? 'Text: ' : 'Email: '}{t.vendorName}
                       </span>
                       <span className="faint" style={{ fontSize: 11, flexShrink: 0 }}>{fmtTime(t.ts)}</span>
                     </div>
@@ -146,7 +156,7 @@ export default function Inbox({ data, persist }) {
                       {last?.from === 'agent' ? 'Agent: ' : ''}{last?.text}
                     </div>
                     <div className="row gap-sm" style={{ marginTop: 5 }}>
-                      {t.status === 'agreed' && <span className="badge ok" style={{ fontSize: 9.5 }}>✅ agreed</span>}
+                      {t.status === 'agreed' && <span className="badge ok" style={{ fontSize: 9.5 }}>agreed</span>}
                       {t.unread && <span className="badge warn" style={{ fontSize: 9.5 }}>new reply</span>}
                       {t.savings > 0 && <span className="badge low" style={{ fontSize: 9.5 }}>saved {fmtMoney(t.savings)}</span>}
                     </div>
@@ -162,12 +172,23 @@ export default function Inbox({ data, persist }) {
                 <>
                   <div className="row between" style={{ borderBottom: '1px solid var(--line-soft)', paddingBottom: 12, marginBottom: 14 }}>
                     <div>
-                      <div style={{ fontSize: 15, fontWeight: 700 }}>{active.vendorName}</div>
+                      <div className="row gap-sm" style={{ alignItems: 'center' }}>
+                        <div style={{ fontSize: 15, fontWeight: 700 }}>{active.vendorName}</div>
+                        {conns.muted?.[active.id] && <span className="badge warn" style={{ fontSize: 10 }}>AI Paused</span>}
+                      </div>
                       <div className="faint" style={{ fontSize: 12 }}>
-                        {active.channel === 'sms' ? `💬 Text · ${active.contactName}` : `✉️ ${active.subject}`}
+                        {active.channel === 'sms' ? `Text · ${active.contactName}` : active.subject}
                       </div>
                     </div>
-                    {active.negotiated > 0 && <span className="badge ok" style={{ fontSize: 11 }}>{fmtMoney(active.negotiated)}</span>}
+                    <div className="row gap-sm" style={{ alignItems: 'center' }}>
+                      {active.negotiated > 0 && <span className="badge ok" style={{ fontSize: 11 }}>{fmtMoney(active.negotiated)}</span>}
+                      <button 
+                        className="btn ghost sm" 
+                        onClick={() => saveConns({ muted: { ...(conns.muted || {}), [active.id]: !conns.muted?.[active.id] } })}
+                      >
+                        {conns.muted?.[active.id] ? 'Resume AI' : 'Pause AI'}
+                      </button>
+                    </div>
                   </div>
 
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, overflowY: 'auto' }}>
@@ -190,12 +211,39 @@ export default function Inbox({ data, persist }) {
                         </div>
                       )
                     })}
+
+                    {/* Agent Draft Mock UI */}
+                    {!conns.autopilot && !conns.muted?.[active.id] && active.status !== 'agreed' && (
+                      <div style={{ alignSelf: 'flex-end', maxWidth: '80%', marginTop: 20 }}>
+                        <div className="faint" style={{ fontSize: 10, marginBottom: 3, textAlign: 'right', color: 'var(--rose-deep)' }}>
+                          Drafting response...
+                        </div>
+                        <div style={{
+                          padding: '12px', borderRadius: 12, fontSize: 13, lineHeight: 1.5,
+                          background: 'var(--bg-2)',
+                          border: '1px dashed var(--line)',
+                        }}>
+                          <div>Thanks so much! Could we tentatively hold that spot while I confirm with the couple?</div>
+                          <div className="row gap-sm" style={{ marginTop: 10, justifyContent: 'flex-end' }}>
+                            <button className="btn sm ghost">Edit</button>
+                            <button className="btn sm ghost">Reject</button>
+                            <button className="btn sm primary">Approve & Send</button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="row gap-sm" style={{ marginTop: 14, paddingTop: 12, borderTop: '1px solid var(--line-soft)', alignItems: 'center' }}>
-                    <span className="spin" />
+                    {!conns.muted?.[active.id] && <span className="spin" />}
                     <span className="faint" style={{ fontSize: 12.5 }}>
-                      {active.status === 'agreed' ? 'Deal agreed — agent is preparing the contract.' : 'AIsle agent is drafting the next reply for you to approve.'}
+                      {conns.muted?.[active.id] 
+                        ? 'AI is paused for this thread. It will not reply.'
+                        : active.status === 'agreed' 
+                          ? 'Deal agreed — agent is preparing the contract.' 
+                          : conns.autopilot
+                            ? 'AIsle agent is handling this conversation on autopilot.'
+                            : 'AIsle agent drafted a reply for you to review.'}
                     </span>
                   </div>
                 </>
@@ -218,8 +266,7 @@ export default function Inbox({ data, persist }) {
             <div style={{ marginBottom: 16 }}>
               {GMAIL_SCOPES.map((s) => (
                 <div key={s.id} className="row gap-sm" style={{ padding: '8px 0', alignItems: 'flex-start' }}>
-                  <span style={{ fontSize: 16 }}>{s.icon}</span>
-                  <span style={{ fontSize: 13 }}>{s.label}</span>
+                  <span style={{ fontSize: 13 }}>• {s.label}</span>
                 </div>
               ))}
             </div>
@@ -255,8 +302,7 @@ export default function Inbox({ data, persist }) {
                 <div style={{ marginBottom: 16 }}>
                   {SMS_SCOPES.map((s) => (
                     <div key={s.id} className="row gap-sm" style={{ padding: '8px 0', alignItems: 'flex-start' }}>
-                      <span style={{ fontSize: 16 }}>{s.icon}</span>
-                      <span style={{ fontSize: 13 }}>{s.label}</span>
+                      <span style={{ fontSize: 13 }}>• {s.label}</span>
                     </div>
                   ))}
                 </div>

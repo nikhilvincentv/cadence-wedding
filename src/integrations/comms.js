@@ -3,14 +3,14 @@ const uid = () => Math.random().toString(36).slice(2, 9)
 const LIVE = { gmail: false, sms: false }
 
 export const GMAIL_SCOPES = [
-  { id: 'read', icon: '✉️', label: 'Read incoming vendor emails', scope: 'gmail.readonly' },
-  { id: 'send', icon: '📤', label: 'Send and reply to vendors on your behalf', scope: 'gmail.send' },
-  { id: 'label', icon: '🏷️', label: 'Organize and label your wedding threads', scope: 'gmail.labels' },
+  { id: 'read', icon: '', label: 'Read incoming vendor emails', scope: 'gmail.readonly' },
+  { id: 'send', icon: '', label: 'Send and reply to vendors on your behalf', scope: 'gmail.send' },
+  { id: 'label', icon: '', label: 'Organize and label your wedding threads', scope: 'gmail.labels' },
 ]
 
 export const SMS_SCOPES = [
-  { id: 'send', icon: '💬', label: 'Text vendors from a dedicated wedding number', scope: 'sms.send' },
-  { id: 'read', icon: '📥', label: 'Receive vendor replies as threads', scope: 'sms.receive' },
+  { id: 'send', icon: '', label: 'Text vendors from a dedicated wedding number', scope: 'sms.send' },
+  { id: 'read', icon: '', label: 'Receive vendor replies as threads', scope: 'sms.receive' },
 ]
 
 async function gmailAuthorizeLive() {
