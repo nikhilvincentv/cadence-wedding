@@ -158,94 +158,63 @@ USER MESSAGE:
 Respond helpfully. Include a <mutation> block only if proposing concrete data changes.`
 }
 
-export const SEATING_SYSTEM = `You are an expert wedding seating planner.
-You assign guests to reception tables the way a thoughtful coordinator would.
+export const INBOX_SYSTEM = `You are Cadence AI Inbox Processor, an intelligent assistant for managing wedding-related communications.
+You will receive email or message threads related to wedding planning.
 
-Rules you must follow:
-- Never exceed a table's capacity.
-- Keep family members and friend groups together at the same table when possible.
-- Try to balance the two sides of the family across the room rather than fully segregating them.
-- Seat guests who requested lodging/transport near each other when it helps logistics.
-- Every guest provided must be assigned to exactly one table. If there is not enough capacity, fill tables to capacity and leave the rest unassigned (tableId null).
+Your role is to:
+1. Provide a concise TL;DR (Too Long; Didn't Read) summary of the thread.
+2. Assess the impact of the thread on the wedding plan (e.g., timeline, budget, vendors, guests).
+3. Assign an impact level (low, medium, high).
 
-Respond ONLY with strict JSON:
+Respond ONLY with strict JSON matching this schema:
 {
-  "summary": "one sentence describing the arrangement",
-  "reasoning": ["short step", "short step", ...],
-  "assignments": [ { "guestId": "abc", "tableId": "t1" } ]
-}
-guestId must be one of the provided guest ids. tableId must be one of the provided table ids, or null if unassigned.`
+  "tldr": "a concise summary of the thread",
+  "impact": "a description of the impact on the wedding plan",
+  "impactLevel": "low" | "medium" | "high"
+}`
 
-export const PLAN_SYSTEM = `You are AIsle's wedding planning engine.
-Given a couple's questionnaire answers, generate a complete, realistic STARTER plan they can edit.
-Tailor everything to their guest count, total budget, top priorities, style, and how far along they are.
-
-Respond ONLY with strict JSON:
-{
-  "summary": "one sentence on the plan you built",
-  "tasks": ["short actionable task", ...],
-  "vendors": [ { "name": "Photographer", "category": "Photography" }, ... ],
-  "timeline": [ { "time": "8:00 AM", "title": "Hair & makeup begins", "durationMin": 210 }, ... ],
-  "budgetCategories": [ { "name": "Venue", "projected": 18000 }, ... ]
-}
-Rules:
-- 8-12 tasks, ordered by urgency for their planning stage.
-- vendors = the roles they still need to book (Photography, Catering, Florals, Music, Beauty, Cake, Officiant, Venue, etc.).
-- 8-12 timeline events for a realistic wedding day, in order.
-- budgetCategories must sum to approximately their total budget, and give MORE budget to their stated priorities.
-- All amounts are plain numbers (no $ or commas).`
-
-export function planUser({ wedding, profile }) {
-  return `COUPLE: ${wedding.couple || 'the couple'}
-DATE: ${wedding.dateLabel || wedding.date || 'TBD'}
-VENUE: ${wedding.venue || 'TBD'}
-GUESTS: ${wedding.guestCount || 'unknown'}
-TOTAL BUDGET: $${wedding.budgetTotal || 0}
-TOP PRIORITIES: ${(profile?.priorities || []).join(', ') || 'none stated'}
-STYLE: ${profile?.style || 'unspecified'}
-PLANNING STAGE: ${profile?.stage || 'unspecified'}
-
-Build their starter plan and respond with the JSON described in your instructions.`
-}
-
-export const EMAIL_SYSTEM = `You are AIsle's inbox intelligence. You read a wedding vendor email
-and pull out what the couple needs to act on.
-
-Respond ONLY with strict JSON:
-{
-  "summary": "one sentence on what this email is about",
-  "vendorName": "the vendor / sender business, or ''",
-  "payments": [ { "label": "Final balance", "amount": 9200, "dueDate": "2026-08-29" } ],
-  "dateChanges": [ { "what": "Engagement session", "from": "Aug 22", "to": "Aug 23 5:30 PM" } ],
-  "deadlines": [ { "what": "Lock final headcount", "date": "2026-09-02" } ],
-  "actionItems": [ "short thing the couple must do" ]
-}
-Amounts are numbers. Dates YYYY-MM-DD when a calendar date is given, else a short label.
-Use empty arrays when nothing applies.`
-
-export function emailUser(email) {
-  return `FROM: ${email.from}
-SUBJECT: ${email.subject}
-DATE: ${email.date}
-
-${email.body}
-
-Extract the structured intelligence and respond with the JSON described in your instructions.`
-}
-
-export function seatingUser({ guests, tables, notes }) {
-  const guestList = guests
-    .map((g) => `- ${g.id}: ${g.name} (${g.relationship || 'guest'}, rsvp: ${g.rsvp || 'awaiting'}${g.notes ? `, note: ${g.notes}` : ''})`)
-    .join('\n')
-  const tableList = tables
-    .map((t) => `- ${t.id}: ${t.name} (capacity ${t.capacity})`)
+export function inboxUser({ wedding, vendors, timeline, budgetCategories, guests, payments, thread }) {
+  const vendorList = (vendors || [])
+    .map((v) => `- ${v.id}: ${v.name} (${v.category}, status: ${v.status || 'unknown'})`)
     .join('\n')
 
-  return `GUESTS TO SEAT (${guests.length}):
-${guestList}
+  const tlSummary = (timeline || [])
+    .slice(0, 20)
+    .map((t) => `- ${t.time || '?'}: ${t.title} (${t.durationMin || 0}min${t.locked ? ', locked' : ''})`)
+    .join('\n')
 
-TABLES (${tables.length}):
-${tableList}
+  const budgetSummary = (budgetCategories || [])
+    .map((c) => `- ${c.name}: projected $${c.projected || 0}, actual $${c.actual || 0}`)
+    .join('\n')
 
-${notes ? `SPECIAL REQUESTS: ${notes}\n\n` : ''}Assign every guest to a table following your rules, and respond with the JSON described in your instructions.`
+  const guestCount = (guests || []).length
+  const confirmedCount = (guests || []).filter((g) => g.rsvp === 'confirmed').length
+
+  const paymentList = (payments || [])
+    .filter((p) => p.status !== 'paid')
+    .map((p) => `- ${p.vendor || 'Unknown'}: $${p.amount || 0} due ${p.dueDate || 'TBD'} (${p.status || 'pending'})`)
+    .join('\n')
+
+  return `WEDDING: ${wedding?.couple || 'Unknown couple'}, date: ${wedding?.dateLabel || wedding?.date || 'TBD'}, venue: ${wedding?.venue || 'TBD'}.
+Budget: $${wedding?.budgetTotal || 0} total. Guests: ${guestCount} invited, ${confirmedCount} confirmed.
+
+VENDORS:
+${vendorList || 'No vendors yet.'}
+
+TIMELINE (first 20 events):
+${tlSummary || 'No timeline events yet.'}
+
+BUDGET CATEGORIES:
+${budgetSummary || 'No budget categories yet.'}
+
+OUTSTANDING PAYMENTS:
+${paymentList || 'No outstanding payments.'}
+
+INBOX THREAD:
+Sender: ${thread.sender}
+Subject: ${thread.subject}
+Body: ${thread.body}
+
+Provide the TL;DR, impact, and impactLevel for this thread.`
 }
+

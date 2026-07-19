@@ -8,10 +8,11 @@ import Contracts from './views/Contracts.jsx'
 import Budget from './views/Budget.jsx'
 import Guests from './views/Guests.jsx'
 import AICoordinator from './views/AICoordinator.jsx'
+import Inbox from './views/Inbox.jsx'
 import Vendors from './views/Vendors.jsx'
+import VendorWorkspace from './views/VendorWorkspace.jsx'
 import Seating from './views/Seating.jsx'
 import SearchPalette from './components/SearchPalette.jsx'
-import Venue from './views/Venue.jsx'
 import Inbox from './views/Inbox.jsx'
 import Inspiration from './views/Inspiration.jsx'
 
@@ -22,8 +23,7 @@ const NAV = [
   { id: 'guests',      label: 'Guests',           icon: '♡' },
   { id: 'vendors',     label: 'Vendors',          icon: '◈' },
   { id: 'contracts',   label: 'Contracts',        icon: '✦' },
-  { id: 'seating',     label: 'Seating',          icon: '⊞' },
-  { id: 'venue',       label: 'Venue & Nearby',   icon: '⌖' },
+  { id: 'seating',     label: 'Seating & Venue',  icon: '⊞' },
   { id: 'inspiration', label: 'Inspiration',      icon: '✧' },
   { id: 'inbox',       label: 'Inbox',            icon: '✉' },
   { id: 'ai',          label: 'AI Coordinator',   icon: '◉' },
@@ -139,14 +139,7 @@ export default function App() {
         ))}
         <div className="nav-spacer" />
         <div className="nav-foot">
-          <div className={`aipill ${live ? 'live' : 'demo'}`}>
-            <span className="dot" />
-            {live ? `AI live · ${status.model}` : 'AI offline · built-in reasoner'}
-          </div>
-          <div className={`aipill ${data.persisted ? 'live' : 'demo'}`} style={{ marginTop: 8 }}>
-            <span className="dot" />
-            {data.persisted ? 'Saved to your account' : 'Not saved (offline)'}
-          </div>
+          
           <div className="row between" style={{ marginTop: 12 }}>
             <div className="faint" style={{ fontSize: 11, lineHeight: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {user?.primaryEmailAddress?.emailAddress || data.wedding.couple || 'Signed in'}
@@ -188,19 +181,16 @@ export default function App() {
           <Guests data={data} persist={persist} />
         )}
         {view === 'vendors' && (
-          <Vendors data={data} persist={persist} setView={setView} />
+          <VendorWorkspace data={data} persist={persist} setView={setView} />
         )}
         {view === 'seating' && (
           <Seating data={data} persist={persist} live={live} />
-        )}
-        {view === 'venue' && (
-          <Venue data={data} persist={persist} />
         )}
         {view === 'inspiration' && (
           <Inspiration data={data} persist={persist} />
         )}
         {view === 'inbox' && (
-          <Inbox data={data} persist={persist} live={live} />
+          <div className="view-placeholder">Inbox — coming soon</div>
         )}
         {view === 'ai' && (
           <AICoordinator data={data} persist={persist} status={status} />

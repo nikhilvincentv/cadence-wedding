@@ -12,7 +12,7 @@ export function aiStatus() {
   }
 }
 
-export async function chatJSON({ system, user, temperature = 0.3, maxTokens = 1200 }) {
+export async function chatJSON({ system, user, temperature = 0.3, maxTokens = 1200, returnRaw = false }) {
   if (!aiEnabled) throw new Error('AI disabled - no API key configured')
 
   const controller = new AbortController()
@@ -31,7 +31,8 @@ export async function chatJSON({ system, user, temperature = 0.3, maxTokens = 12
         model: MODEL,
         temperature,
         max_tokens: maxTokens,
-        response_format: { type: 'json_object' },
+        // Don't force json_object mode when caller wants raw text (may contain mixed content)
+        ...(returnRaw ? {} : { response_format: { type: 'json_object' } }),
         messages: [
           { role: 'system', content: system },
           { role: 'user', content: user },
@@ -47,7 +48,7 @@ export async function chatJSON({ system, user, temperature = 0.3, maxTokens = 12
     const data = await res.json()
     const content = data.choices?.[0]?.message?.content
     if (!content) throw new Error('AI returned empty content')
-    return JSON.parse(content)
+    return returnRaw ? content : JSON.parse(content)
   } finally {
     clearTimeout(timeout)
   }

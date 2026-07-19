@@ -8,9 +8,8 @@ import { fullState } from './data.js'
 import { aiStatus, chatJSON } from './ai.js'
 import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser, SEATING_SYSTEM, seatingUser, EMAIL_SYSTEM, emailUser, PLAN_SYSTEM, planUser } from './prompts.js'
 import { cascadeFallback, contractFallback, seatingFallback, emailFallback, planFallback } from './fallback.js'
+import { coordinatorHandler } from '../api/coordinator.js'
 import { getUserState, saveUserState } from './db.js'
-import { reindexUser, searchUser, buildDocs, typesenseEnabled } from './typesense.js'
-import { findNearby } from './places.js'
 
 const app = express()
 app.use(cors())
@@ -135,6 +134,8 @@ app.post('/api/email', async (req, res) => {
   }
 })
 
+app.post('/api/coordinator', coordinatorHandler)
+
 app.post('/api/contract', async (req, res) => {
   const { text } = req.body || {}
   if (!text || typeof text !== 'string')
@@ -152,6 +153,9 @@ app.post('/api/contract', async (req, res) => {
     return res.json({ ...contractFallback(text), source: 'demo', note: String(err.message || err) })
   }
 })
+
+app.use('/api/coordinator', coordinatorRouter)
+
 
 const dist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist')
 if (existsSync(dist)) {
