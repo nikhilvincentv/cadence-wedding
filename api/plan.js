@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   const { wedding, profile } = body
   if (!wedding) return res.status(400).json({ error: 'Missing wedding.' })
   try {
-    const result = await chatJSON({ system: PLAN_SYSTEM, user: planUser({ wedding, profile }), temperature: 0.4, maxTokens: 1800 })
+    const result = await chatJSON({ system: PLAN_SYSTEM, user: planUser({ wedding, profile }), temperature: 0.4, maxTokens: 2600 })
     return res.status(200).json({ ...result, source: 'model' })
   } catch (err) {
     return res.status(200).json({ ...planFallback({ wedding, profile }), source: 'demo' })

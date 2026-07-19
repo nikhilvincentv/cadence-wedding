@@ -64,7 +64,6 @@ export default function AICoordinator({ data, persist }) {
     setPendingProposal(null);
     setMessages((prev) => [...prev, { role: 'ai', text: 'No problem, the change was discarded.' }]);
   };
-  };
 
   return (
     <div className="ai-coordinator-view">

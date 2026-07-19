@@ -6,14 +6,29 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { fullState } from './data.js'
 import { aiStatus, chatJSON } from './ai.js'
-import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser, SEATING_SYSTEM, seatingUser, EMAIL_SYSTEM, emailUser, PLAN_SYSTEM, planUser } from './prompts.js'
-import { cascadeFallback, contractFallback, seatingFallback, emailFallback, planFallback } from './fallback.js'
+import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser, SEATING_SYSTEM, seatingUser, EMAIL_SYSTEM, emailUser, PLAN_SYSTEM, planUser, RECOMMEND_SYSTEM, recommendUser, NEGOTIATE_SYSTEM, negotiateUser } from './prompts.js'
+import { cascadeFallback, contractFallback, seatingFallback, emailFallback, planFallback, recommendFallback, negotiateFallback } from './fallback.js'
 import { coordinatorHandler } from '../api/coordinator.js'
 import { getUserState, saveUserState } from './db.js'
 
 const app = express()
 app.use(cors())
 app.use(express.json({ limit: '1mb' }))
+
+function completeRecommendation(result, { wedding, profile, target, categories }) {
+  if (target === 'venues') {
+    if (result?.venues?.length >= 3) return result
+    return recommendFallback({ wedding, profile, target })
+  }
+  const modelCats = result?.categories || {}
+  const fb = recommendFallback({ wedding, profile, target: 'vendors', categories }).categories
+  const out = {}
+  for (const cat of categories || Object.keys(fb)) {
+    const got = Array.isArray(modelCats[cat]) ? modelCats[cat].filter((v) => v && v.name) : []
+    out[cat] = got.length >= 2 ? got : (fb[cat] || got)
+  }
+  return { categories: out }
+}
 
 const PORT = process.env.PORT || 8787
 
@@ -116,10 +131,32 @@ app.post('/api/plan', async (req, res) => {
   const { wedding, profile } = req.body || {}
   if (!wedding) return res.status(400).json({ error: 'Missing wedding.' })
   try {
-    const result = await chatJSON({ system: PLAN_SYSTEM, user: planUser({ wedding, profile }), temperature: 0.4, maxTokens: 1800 })
+    const result = await chatJSON({ system: PLAN_SYSTEM, user: planUser({ wedding, profile }), temperature: 0.4, maxTokens: 2600 })
     return res.json({ ...result, source: 'model' })
   } catch (err) {
     return res.json({ ...planFallback({ wedding, profile }), source: 'demo' })
+  }
+})
+
+app.post('/api/recommend', async (req, res) => {
+  const { wedding, profile, target, categories } = req.body || {}
+  if (!wedding) return res.status(400).json({ error: 'Missing wedding.' })
+  try {
+    const result = await chatJSON({ system: RECOMMEND_SYSTEM, user: recommendUser({ wedding, profile, target, categories }), temperature: 0.6, maxTokens: 3600 })
+    return res.json({ ...completeRecommendation(result, { wedding, profile, target, categories }), source: 'model' })
+  } catch (err) {
+    return res.json({ ...recommendFallback({ wedding, profile, target, categories }), source: 'demo' })
+  }
+})
+
+app.post('/api/negotiate', async (req, res) => {
+  const { vendor, wedding, profile, history, action, targetPrice } = req.body || {}
+  if (!vendor) return res.status(400).json({ error: 'Missing vendor.' })
+  try {
+    const result = await chatJSON({ system: NEGOTIATE_SYSTEM, user: negotiateUser({ vendor, wedding, profile, history, action, targetPrice }), temperature: 0.5, maxTokens: 900 })
+    return res.json({ ...result, source: 'model' })
+  } catch (err) {
+    return res.json({ ...negotiateFallback({ vendor, history, action, targetPrice }), source: 'demo' })
   }
 })
 
@@ -153,9 +190,6 @@ app.post('/api/contract', async (req, res) => {
     return res.json({ ...contractFallback(text), source: 'demo', note: String(err.message || err) })
   }
 })
-
-app.use('/api/coordinator', coordinatorRouter)
-
 
 const dist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist')
 if (existsSync(dist)) {

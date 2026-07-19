@@ -213,15 +213,32 @@ export function planFallback({ wedding = {}, profile = {} } = {}) {
   const total = weights.reduce((s, x) => s + x.w, 0)
   const budgetCategories = weights.map((x) => ({ name: x.name, projected: Math.round((x.w / total) * budget) }))
 
+  const isP = (key) => priorities.some((p) => p.includes(key))
   const vendors = [
-    { name: 'Photographer', category: 'Photography' },
-    { name: 'Caterer', category: 'Catering' },
-    { name: 'Florist', category: 'Florals' },
-    { name: 'DJ or Band', category: 'Music / DJ' },
-    { name: 'Hair & Makeup', category: 'Beauty' },
-    { name: 'Officiant', category: 'Officiant' },
-    { name: 'Cake Baker', category: 'Cake' },
-    { name: 'Venue Coordinator', category: 'Venue' },
+    { name: 'Evergreen Photography Co.', category: 'Photography', contact: 'Renata Silva', status: isP('photo') ? 'booked' : 'pending', rating: 4.9 },
+    { name: 'Table & Vine Catering', category: 'Catering', contact: 'Marcus Webb', status: isP('food') ? 'booked' : 'pending', rating: 4.8 },
+    { name: 'Fern & Fable Florals', category: 'Florals', contact: 'Theo Marsh', status: isP('floral') ? 'booked' : 'pending', rating: 4.7 },
+    { name: 'Pulse Collective (DJ)', category: 'Music / DJ', contact: 'Dana Cole', status: isP('music') ? 'booked' : 'pending', rating: 4.6 },
+    { name: 'Glow Studio', category: 'Beauty', contact: 'Priya Nair', status: 'pending', rating: 4.8 },
+    { name: 'Rev. Alan Brooks', category: 'Officiant', contact: 'Alan Brooks', status: 'pending', rating: 5.0 },
+    { name: 'Flour & Feather Cakes', category: 'Cake', contact: 'Nina Park', status: 'pending', rating: 4.7 },
+    { name: 'Emerald Shuttle', category: 'Transportation', contact: 'Sam Ortiz', status: 'pending', rating: 4.5 },
+  ]
+  const guests = [
+    { name: 'Elena Rivera', relationship: 'family', rsvp: 'confirmed' },
+    { name: 'Robert Rivera', relationship: 'family', rsvp: 'confirmed' },
+    { name: 'Grandma Chen', relationship: 'family', rsvp: 'confirmed' },
+    { name: 'Uncle Joe', relationship: 'family', rsvp: 'awaiting' },
+    { name: 'Aunt Carol', relationship: 'family', rsvp: 'confirmed' },
+    { name: 'Sam Patel', relationship: 'friends', rsvp: 'confirmed' },
+    { name: 'Alex Kim', relationship: 'friends', rsvp: 'confirmed' },
+    { name: 'Priya Shah', relationship: 'friends', rsvp: 'confirmed' },
+    { name: 'Jordan Lee', relationship: 'friends', rsvp: 'awaiting' },
+    { name: 'Taylor Brooks', relationship: 'friends', rsvp: 'confirmed' },
+    { name: 'Dana Cole', relationship: 'coworkers', rsvp: 'confirmed' },
+    { name: 'Chris Nolan', relationship: 'coworkers', rsvp: 'awaiting' },
+    { name: 'Morgan Reed', relationship: 'coworkers', rsvp: 'confirmed' },
+    { name: 'Neighbor Pat', relationship: 'other', rsvp: 'awaiting' },
   ]
 
   const tasks = [
@@ -250,7 +267,161 @@ export function planFallback({ wedding = {}, profile = {} } = {}) {
     { time: '8:00 PM', title: 'Open dancing', durationMin: 150 },
   ]
 
-  return { summary: 'Starter plan generated from your questionnaire — edit anything.', tasks, vendors, timeline, budgetCategories }
+  return { summary: 'Starter plan generated from your questionnaire — edit anything.', tasks, vendors, timeline, budgetCategories, guests }
+}
+
+
+const VENUE_BANK = [
+  { key: 'Estate', tagline: 'Restored estate with a garden lawn built for golden-hour ceremonies', style: 'Garden', share: 0.9, capacity: 200, rating: 4.9, highlights: ['On-site catering kitchen', 'Rain-plan tent included', 'Getting-ready suites for both parties'] },
+  { key: 'Barn', tagline: 'Rustic barn + string-lit courtyard for a relaxed celebration', style: 'Rustic', share: 0.55, capacity: 160, rating: 4.7, highlights: ['BYO catering allowed', 'Free parking on site', 'Fire-pit lounge'] },
+  { key: 'Loft', tagline: 'Modern downtown loft with floor-to-ceiling skyline windows', style: 'Modern', share: 1.15, capacity: 140, rating: 4.8, highlights: ['In-house bar & AV', 'Elevator load-in', 'Late-night curfew of 1 AM'] },
+  { key: 'Vineyard', tagline: 'Hillside vineyard with a covered terrace and sunset views', style: 'Luxury', share: 1.4, capacity: 180, rating: 4.9, highlights: ['Wine package included', 'Bridal cottage', 'Ceremony + reception sites'] },
+  { key: 'Gardens', tagline: 'Botanical gardens with a glass conservatory backup', style: 'Classic', share: 0.75, capacity: 220, rating: 4.6, highlights: ['Indoor + outdoor options', 'Ample guest parking', 'Preferred vendor list'] },
+]
+const VENUE_PREFIXES = ['The Willows', 'Cedar Hollow', 'Rosewood', 'Lakeside', 'Ivy & Oak', 'Harborview', 'Stonebridge', 'Maple Grove']
+const OWNER_NAMES = ['Marina Ellis', 'David Cho', 'Priya Nair', 'Marcus Webb', 'Elena Rivera', 'Theo Marsh', 'Nina Park', 'Sam Ortiz', 'Renata Silva', 'Dana Cole']
+
+const slugOf = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '')
+
+function cityOf(wedding) {
+  return (wedding.venue || '').split(',')[0].trim() || 'your area'
+}
+
+function venuesFallback(wedding, profile) {
+  const budget = Number(wedding.budgetTotal) || 40000
+  const venueBudget = budget * 0.4
+  const style = (profile?.styles || [profile?.style]).filter(Boolean)[0]
+  const city = cityOf(wedding)
+  const region = (wedding.venue || city).split(',').slice(1).join(',').trim() || city
+  const ordered = [...VENUE_BANK].sort((a, b) => (b.style === style ? 1 : 0) - (a.style === style ? 1 : 0))
+  return ordered.slice(0, 5).map((v, i) => {
+    const name = `${VENUE_PREFIXES[i % VENUE_PREFIXES.length]} ${v.key}`
+    return {
+      id: `venue-${slugOf(name)}`,
+      name,
+      tagline: v.tagline,
+      style: v.style,
+      priceFrom: Math.round((venueBudget * v.share) / 100) * 100,
+      capacity: v.capacity,
+      rating: v.rating,
+      address: `${city}${region && region !== city ? `, ${region}` : ''}`,
+      contactName: OWNER_NAMES[i % OWNER_NAMES.length],
+      email: `events@${slugOf(name)}.com`,
+      phone: `(555) 555-01${String(20 + i).slice(-2)}`,
+      highlights: v.highlights,
+    }
+  })
+}
+
+const CATEGORY_BANK = {
+  Photography: { share: 0.12, styles: ['Documentary', 'Editorial', 'Fine-art', 'Candid'], names: ['Evergreen Photography Co.', 'Goldenlight Studio', 'Wanderfield Photo', 'Aperture & Co.'], owners: ['Renata Silva', 'Owen Blake', 'Maya Chen', 'Luis Ortega'], blurbs: ['Two shooters, film + digital, known for candid golden-hour work.', 'Editorial style with a fast 3-week gallery turnaround.', 'Adventurous, documentary coverage with no shot list needed.', 'Bright, timeless images and an included engagement session.'] },
+  Catering: { share: 0.26, styles: ['Plated', 'Family-style', 'Farm-to-table', 'Global'], names: ['Table & Vine Catering', 'Harvest & Hearth', 'Saffron Social', 'The Copper Spoon'], owners: ['Marcus Webb', 'Ana Duarte', 'Raj Patel', 'Grace Lin'], blurbs: ['Seasonal plated menus with a hosted-bar package.', 'Family-style feasts that keep the table social.', 'Farm-to-table sourcing with vegan and halal options.', 'Globally-inspired stations and a late-night snack cart.'] },
+  'Music / DJ': { share: 0.06, styles: ['Open-format', 'House', 'Live-band', 'Vinyl'], names: ['Pulse Collective', 'Northside Sound', 'The Gold Room DJs', 'Velvet Groove'], owners: ['Dana Cole', 'Chris Nolan', 'Tariq Bell', 'Sofia Marín'], blurbs: ['Open-format DJ + MC with ceremony sound included.', 'Reads the room; uplighting package available.', 'Seamless mixes and a live sax add-on.', 'Vinyl-first sets for a classic dance floor.'] },
+  Florist: { share: 0.08, styles: ['Garden', 'Modern', 'Wild', 'Romantic'], names: ['Fern & Fable Florals', 'Bloom & Bramble', 'Petal Theory', 'Wildroot Studio'], owners: ['Theo Marsh', 'Iris Wong', 'Camille Ford', 'Jonah Reed'], blurbs: ['Lush garden arrangements with in-season sourcing.', 'Sculptural, modern installations and arches.', 'Loose, wild-picked bouquets and greenery.', 'Romantic palettes with heirloom roses.'] },
+  Cake: { share: 0.03, styles: ['Buttercream', 'Modern', 'Naked', 'Classic'], names: ['Flour & Feather Cakes', 'Sugar & Salt', 'The Tiered Table', 'Whisk Bakehouse'], owners: ['Nina Park', 'Dev Shah', 'Clara Boone', 'Emma Ito'], blurbs: ['Hand-piped buttercream and a free tasting.', 'Minimalist modern tiers with fresh florals.', 'Naked cakes and a dessert-bar option.', 'Classic flavors and a keepsake top tier.'] },
+  Beauty: { share: 0.03, styles: ['Natural', 'Glam', 'Editorial', 'Soft'], names: ['Glow Studio', 'Aura Beauty Co.', 'Rouge & Rose', 'The Getting-Ready Room'], owners: ['Priya Nair', 'Bella Cruz', 'Naomi Ford', 'Lena Ross'], blurbs: ['Natural, long-wear looks with an on-site team.', 'Full-glam artistry and a trial included.', 'Editorial hair + makeup for the whole party.', 'Soft, romantic styling and airbrush option.'] },
+  Officiant: { share: 0.015, styles: ['Personal', 'Traditional', 'Interfaith', 'Modern'], names: ['Rev. Alan Brooks', 'Ceremonies by Cara', 'The Vow Company', 'Rev. Michael Ortiz'], owners: ['Alan Brooks', 'Cara Nguyen', 'Sam Lowe', 'Michael Ortiz'], blurbs: ['Warm, personalized ceremonies from a phone consult.', 'Custom vows workshop included.', 'Interfaith and bilingual ceremonies.', 'Modern, concise, and heartfelt.'] },
+  Transportation: { share: 0.025, styles: ['Shuttle', 'Classic', 'Luxury', 'Trolley'], names: ['Emerald Shuttle', 'Vintage Wheels Co.', 'Crown Car Service', 'City Trolley Rentals'], owners: ['Sam Ortiz', 'Gary Fields', 'Denise Yu', 'Paul Grant'], blurbs: ['Guest shuttles with a day-of coordinator.', 'Restored classic cars for the couple.', 'Black-car luxury fleet with chauffeurs.', 'Open-air trolley for a fun guest ride.'] },
+}
+
+export const FALLBACK_VENDOR_CATEGORIES = Object.keys(CATEGORY_BANK)
+
+function vendorsFallback(wedding, profile, categories) {
+  const budget = Number(wedding.budgetTotal) || 40000
+  const style = (profile?.styles || [profile?.style]).filter(Boolean)[0]
+  const cats = (categories && categories.length ? categories : FALLBACK_VENDOR_CATEGORIES).filter((c) => CATEGORY_BANK[c])
+  const out = {}
+  for (const cat of cats) {
+    const b = CATEGORY_BANK[cat]
+    const baseline = budget * b.share
+    const factors = [0.8, 1.0, 1.2, 1.45]
+    out[cat] = b.names.map((name, i) => {
+      const price = Math.max(300, Math.round((baseline * factors[i]) / 50) * 50)
+      const styleMatch = b.styles[i] === style
+      return {
+        id: `${slugOf(cat)}-${slugOf(name)}`,
+        name,
+        category: cat,
+        contactName: b.owners[i],
+        email: `hello@${slugOf(name)}.com`,
+        phone: `(555) 555-${String(1000 + i * 7).slice(-4)}`,
+        rating: [4.9, 4.7, 4.6, 4.8][i] + (styleMatch ? 0.1 : 0) > 5 ? 5 : [4.9, 4.7, 4.6, 4.8][i],
+        priceLabel: `from $${price.toLocaleString('en-US')}`,
+        priceValue: price,
+        style: b.styles[i],
+        blurb: b.blurbs[i],
+      }
+    })
+  }
+  return out
+}
+
+export function recommendFallback({ wedding = {}, profile = {}, target = 'vendors', categories } = {}) {
+  if (target === 'venues') return { venues: venuesFallback(wedding, profile) }
+  return { categories: vendorsFallback(wedding, profile, categories) }
+}
+
+
+export function negotiateFallback({ vendor = {}, history = [], action = 'contact', targetPrice } = {}) {
+  const opening = Number(vendor.priceValue) || 3000
+  const name = vendor.contactName || vendor.contact || 'there'
+  const firstName = String(name).split(' ')[0]
+  const vName = vendor.name || 'the vendor'
+  const low = Math.round((opening * 0.86) / 50) * 50
+  const high = Math.round((opening * 1.05) / 50) * 50
+
+  const lastVendorQuote = [...history].reverse().find((m) => m.role === 'vendor' && m.quote)?.quote || opening
+
+  if (action === 'accept') {
+    return {
+      vendorMessage: { text: `Wonderful — we're thrilled to be part of your day! I'll send over the contract and a deposit invoice this afternoon so we can lock the date. Talk soon!`, quote: null },
+      analysis: { benchmarkLow: low, benchmarkHigh: high, verdict: 'good', note: 'Deal agreed — review the contract when it arrives.', suggestedCounter: null, draftReply: `Thank you, ${firstName}! We're excited too. We'll watch for the contract and get the deposit over right away.` },
+      status: 'agreed',
+      savings: Math.max(0, opening - lastVendorQuote),
+    }
+  }
+
+  if (action === 'counter') {
+    const target = Number(targetPrice) || Math.round(opening * 0.9)
+    const floor = Math.round(opening * 0.85)
+    const met = Math.max(floor, Math.round(((lastVendorQuote + target) / 2) / 50) * 50)
+    const trimmed = met > target
+    return {
+      vendorMessage: {
+        text: trimmed
+          ? `I hear you on the budget. I can do $${met.toLocaleString('en-US')} if we streamline the package slightly — that keeps the quality high and gets us close to your number.`
+          : `You know what — let's make it work. I can meet you at $${met.toLocaleString('en-US')}. We'd love to be there for you two.`,
+        quote: met,
+      },
+      analysis: {
+        benchmarkLow: low, benchmarkHigh: high,
+        verdict: met <= high ? 'fair' : 'high',
+        note: met <= (target + 100) ? 'This is right in your target range — a strong deal.' : 'Close to your target; one more nudge could land it.',
+        suggestedCounter: met <= (target + 100) ? null : target,
+        draftReply: met <= (target + 100)
+          ? `That works for us, ${firstName} — let's move forward at $${met.toLocaleString('en-US')}.`
+          : `Appreciate it, ${firstName}. Could you do $${target.toLocaleString('en-US')} even? If so we're ready to book today.`,
+      },
+      status: 'offer',
+      savings: Math.max(0, opening - met),
+    }
+  }
+
+  return {
+    vendorMessage: {
+      text: `Hi! Thanks so much for reaching out — we'd love to be part of your wedding. For your date and guest count, our package comes to $${opening.toLocaleString('en-US')}. It includes everything in our standard collection; happy to tailor it to what matters most to you.`,
+      quote: opening,
+    },
+    analysis: {
+      benchmarkLow: low, benchmarkHigh: high,
+      verdict: opening > high ? 'high' : 'fair',
+      note: `Comparable ${vendor.category || 'vendors'} in your area run about $${low.toLocaleString('en-US')}–$${high.toLocaleString('en-US')}. ${opening > high ? "There's room to negotiate." : 'This is a fair opening quote.'}`,
+      suggestedCounter: Math.round((opening * 0.9) / 50) * 50,
+      draftReply: `Hi ${firstName}, we love your work at ${vName}! Our budget for this is closer to $${(Math.round((opening * 0.9) / 50) * 50).toLocaleString('en-US')}. Is there a way to tailor a package that fits? We'd really like to make it work.`,
+    },
+    status: 'negotiating',
+    savings: 0,
+  }
 }
 
 export function emailFallback(email = {}) {

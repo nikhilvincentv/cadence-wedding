@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useUser, useClerk } from '@clerk/clerk-react'
-import { getStatus, getState, saveState, daysUntil, generatePlan, findNearbyVendors } from './api.js'
+import { getStatus, getState, saveState, daysUntil, recommend } from './api.js'
+import { VENDOR_CATEGORIES, withId } from './journey.js'
 import Onboarding from './Onboarding.jsx'
 import CommandCenter from './views/CommandCenter.jsx'
 import TimelineView from './views/TimelineView.jsx'
@@ -10,20 +11,20 @@ import Guests from './views/Guests.jsx'
 import AICoordinator from './views/AICoordinator.jsx'
 import Inbox from './views/Inbox.jsx'
 import Vendors from './views/Vendors.jsx'
-import VendorWorkspace from './views/VendorWorkspace.jsx'
 import Seating from './views/Seating.jsx'
 import SearchPalette from './components/SearchPalette.jsx'
-import Inbox from './views/Inbox.jsx'
+import VenueFinder from './views/VenueFinder.jsx'
 import Inspiration from './views/Inspiration.jsx'
 
 const NAV = [
-  { id: 'home',        label: 'Dashboard',       icon: '⌂' },
+  { id: 'home',        label: 'Dashboard',        icon: '⌂' },
+  { id: 'venue',       label: 'Find Venue',       icon: '⌖' },
+  { id: 'vendors',     label: 'Find Vendors',     icon: '◈' },
   { id: 'timeline',    label: 'Timeline',         icon: '◷' },
   { id: 'budget',      label: 'Budget',           icon: '₿' },
   { id: 'guests',      label: 'Guests',           icon: '♡' },
-  { id: 'vendors',     label: 'Vendors',          icon: '◈' },
+  { id: 'seating',     label: 'Seating',          icon: '⊞' },
   { id: 'contracts',   label: 'Contracts',        icon: '✦' },
-  { id: 'seating',     label: 'Seating & Venue',  icon: '⊞' },
   { id: 'inspiration', label: 'Inspiration',      icon: '✧' },
   { id: 'inbox',       label: 'Inbox',            icon: '✉' },
   { id: 'ai',          label: 'AI Coordinator',   icon: '◉' },
@@ -44,7 +45,6 @@ export default function App() {
     getStatus().then(setStatus).catch(() => setStatus({ enabled: false, model: 'demo', provider: 'built-in' }))
   }, [])
 
-  // Listen for ⌘K / Ctrl+K global search palette trigger
   useEffect(() => {
     const onKey = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -56,39 +56,31 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  // Fetch wedding state once authentication details are fully loaded
   useEffect(() => {
     if (!isLoaded || !userId) return
     getState(userId).then(setData)
   }, [isLoaded, userId])
 
-  // After onboarding, auto-build a starter plan (tasks, vendors, timeline, budget) with AI
   useEffect(() => {
     if (!data) return
-    const planEmpty = !(data.tasks && data.tasks.length) && !(data.vendors && data.vendors.length) && !(data.budgetCategories && data.budgetCategories.length)
-    if (!data.completedOnboarding || !data.wedding?.couple || !planEmpty || plannedRef.current) return
+    if (!data.completedOnboarding || !data.wedding?.couple || plannedRef.current) return
+    const recs = data.recommendations || {}
+    const hasVenues = recs.venues && recs.venues.length
+    const hasVendors = recs.categories && Object.keys(recs.categories).length
+    if (hasVenues && hasVendors) return
     plannedRef.current = true
     setBuildingPlan(true)
-    const uid = () => Math.random().toString(36).slice(2, 9)
-    const pm = (t) => {
-      const m = String(t || '').match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i)
-      if (!m) return 0
-      let h = Number(m[1]) % 12
-      if (m[3] && m[3].toUpperCase() === 'PM') h += 12
-      return h * 60 + Number(m[2])
-    }
-    const venue = data.wedding?.venue
     Promise.all([
-      generatePlan(data.wedding, data.profile),
-      venue ? findNearbyVendors(venue).catch(() => null) : Promise.resolve(null),
+      hasVenues ? Promise.resolve({ venues: recs.venues }) : recommend(data.wedding, data.profile, 'venues'),
+      hasVendors ? Promise.resolve({ categories: recs.categories }) : recommend(data.wedding, data.profile, 'vendors', VENDOR_CATEGORIES),
     ])
-      .then(([plan, nearby]) => {
-        const tasks = (plan.tasks || []).map((d) => ({ id: uid(), checked: false, description: typeof d === 'string' ? d : d.description || d.title || '' }))
-        const vendors = (plan.vendors || []).map((v) => ({ id: uid(), name: v.name || 'Vendor', category: v.category || '', contact: '', status: 'pending', rating: null }))
-        const timeline = (plan.timeline || []).map((e) => ({ id: uid(), time: e.time || '12:00 PM', minutes: pm(e.time), title: e.title || 'Event', vendorId: '', durationMin: Number(e.durationMin) || 30, locked: false, note: '' }))
-        const budgetCategories = (plan.budgetCategories || []).map((c) => ({ id: uid(), name: c.name || 'Category', projected: Number(c.projected) || 0, actual: 0 }))
-        const nearbyCache = nearby && nearby.center ? { venue, center: nearby.center, vendors: nearby.vendors } : data.nearbyCache || null
-        persist({ ...data, tasks, vendors, timeline, budgetCategories, nearbyCache })
+      .then(([v, c]) => {
+        const venues = (v.venues || []).map((x) => withId(x, 'venue'))
+        const categories = {}
+        for (const [k, arr] of Object.entries(c.categories || {})) {
+          categories[k] = (arr || []).map((x) => ({ ...withId(x, 'vend'), category: k }))
+        }
+        persist({ ...data, recommendations: { venues, categories } })
         setBuildingPlan(false)
       })
       .catch(() => setBuildingPlan(false))
@@ -162,7 +154,7 @@ export default function App() {
         {buildingPlan && (
           <div className="card pad-lg" style={{ marginBottom: 18, display: 'flex', alignItems: 'center', gap: 12 }}>
             <span className="spin" />
-            <span className="muted">AIsle is building your starter plan — tasks, vendors, timeline, and budget…</span>
+            <span className="muted">AIsle is finding venues and vendors that fit your city, style, and budget…</span>
           </div>
         )}
         {view === 'home' && (
@@ -181,13 +173,16 @@ export default function App() {
           <Guests data={data} persist={persist} />
         )}
         {view === 'vendors' && (
-          <VendorWorkspace data={data} persist={persist} setView={setView} />
+          <Vendors data={data} persist={persist} setView={setView} status={status} />
         )}
         {view === 'seating' && (
           <Seating data={data} persist={persist} live={live} />
         )}
         {view === 'inspiration' && (
           <Inspiration data={data} persist={persist} />
+        )}
+        {view === 'venue' && (
+          <VenueFinder data={data} persist={persist} setView={setView} />
         )}
         {view === 'inbox' && (
           <div className="view-placeholder">Inbox — coming soon</div>

@@ -1,3 +1,16 @@
+export const VENDOR_CATEGORIES = [
+  'Photography',
+  'Catering',
+  'Music / DJ',
+  'Florist',
+  'Cake',
+  'Beauty',
+  'Officiant',
+  'Transportation',
+]
+
+export const VENDOR_STAGES = ['recommended', 'shortlisted', 'contacted', 'negotiating', 'offer', 'booked']
+
 export function emptyWedding() {
   return {
     couple: '',
@@ -41,6 +54,8 @@ export function emptyState() {
     tasks: [],
     inspirationBoard: [],
     contractAnalyses: {},
+    recommendations: { venues: [], categories: {} },
+    negotiations: {},
     ...emptyOnboarding(),
     completedOnboarding: false,
   }

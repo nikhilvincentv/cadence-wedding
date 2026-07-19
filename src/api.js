@@ -43,6 +43,24 @@ export const generatePlan = (wedding, profile) =>
     .then(j)
     .catch(() => ({ error: 'Could not generate plan.' }))
 
+export const recommend = (wedding, profile, target, categories) =>
+  fetch('/api/recommend', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ wedding, profile, target, categories }),
+  })
+    .then(j)
+    .catch(() => ({ error: 'Could not load recommendations.' }))
+
+export const negotiate = (body) =>
+  fetch('/api/negotiate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+    .then(j)
+    .catch(() => ({ error: 'Could not run negotiation.' }))
+
 export const scanEmail = (email) =>
   fetch('/api/email', {
     method: 'POST',
