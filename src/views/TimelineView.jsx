@@ -77,6 +77,7 @@ export default function TimelineView({ data, persist, live }) {
 
   const vName = (id) => vendors.find((v) => v.id === id)?.name || id || 'Unassigned'
   const conflictVendorIds = useMemo(() => new Set((result?.conflicts || []).map((c) => c.vendorId)), [result])
+  const [applied, setApplied] = useState(false)
 
   function openAdd(item, prefill) {
     setDraft(item ? { ...item } : { date: prefill?.date || ymd(cursor), time: prefill?.time || '' })
@@ -155,10 +156,10 @@ export default function TimelineView({ data, persist, live }) {
     if (!change) return
     setLoading(true)
     setResult(null)
+    setApplied(false)
     try {
       const r = await runCascade({ change, timeline: rawTimeline, vendors, wedding, profile: data.profile })
       setResult(r)
-      if (r?.timelineChanges?.length) applyChangesFrom(r)
     } catch (e) {
       setResult({ error: String(e.message || e) })
     } finally {
@@ -185,6 +186,7 @@ export default function TimelineView({ data, persist, live }) {
       return { ...e, time: newTime, minutes: parseMinutes(newTime), durationMin: Number(c.newDurationMin) || e.durationMin }
     })
     persist({ ...data, timeline: next })
+    setApplied(true)
   }
 
   async function generateDay() {
@@ -239,6 +241,20 @@ export default function TimelineView({ data, persist, live }) {
     () => rawTimeline.filter((e) => eventDateStr(e) === ymd(cursor)).sort((a, b) => (a.minutes || 0) - (b.minutes || 0)),
     [rawTimeline, cursor, weddingDateStr]
   )
+  const overlapIds = useMemo(() => {
+    const ids = new Set()
+    for (let i = 0; i < dayEvents.length; i++) {
+      const a = dayEvents[i]
+      const aEnd = (a.minutes || 0) + (a.durationMin || 30)
+      for (let j = i + 1; j < dayEvents.length; j++) {
+        const b = dayEvents[j]
+        if ((b.minutes || 0) >= aEnd) break
+        ids.add(a.id)
+        ids.add(b.id)
+      }
+    }
+    return ids
+  }, [dayEvents])
   const dayStartHour = Math.max(0, Math.min(6, ...dayEvents.map((e) => Math.floor((e.minutes || 0) / 60)), 6))
   const dayEndHour = Math.min(24, Math.max(23, ...dayEvents.map((e) => Math.ceil(((e.minutes || 0) + (e.durationMin || 30)) / 60)), 23))
   const hours = Array.from({ length: dayEndHour - dayStartHour }, (_, i) => dayStartHour + i)
@@ -307,7 +323,7 @@ export default function TimelineView({ data, persist, live }) {
                   const duration = preview ? preview.durationMin : (ev.durationMin || 30)
                   const top = ((minutes - dayStartHour * 60) / 60) * ROW_H
                   const height = Math.max(20, (duration / 60) * ROW_H - 2)
-                  const conflicted = conflictVendorIds.has(ev.vendorId)
+                  const conflicted = conflictVendorIds.has(ev.vendorId) || overlapIds.has(ev.id)
                   return (
                     <div
                       key={ev.id}
@@ -315,7 +331,7 @@ export default function TimelineView({ data, persist, live }) {
                       style={{ top, height }}
                       onPointerDown={(e) => beginDrag(e, ev, 'move')}
                       onClick={(e) => { e.stopPropagation(); if (!dragPreview) openAdd(ev) }}
-                      title={ev.locked ? 'Locked — click to view' : 'Drag to move, click to edit'}
+                      title={overlapIds.has(ev.id) ? 'Overlaps with another event' : ev.locked ? 'Locked — click to view' : 'Drag to move, click to edit'}
                     >
                       <div className="cal-event-title">{ev.locked && <span className="cal-event-lock-ico">🔒</span>} {ev.title}</div>
                       <div className="cal-event-sub">{minutesToTime(minutes)} · {duration}m{ev.vendorId ? ` · ${vName(ev.vendorId)}` : ''}</div>
@@ -326,6 +342,9 @@ export default function TimelineView({ data, persist, live }) {
               </div>
               {dayEvents.length === 0 && (
                 <div className="faint" style={{ fontSize: 13, padding: '14px 0 0' }}>No events this day. Click anywhere on the grid, or use + Add event.</div>
+              )}
+              {overlapIds.size > 0 && (
+                <div className="cal-conflict-banner">⚠ {overlapIds.size} event{overlapIds.size === 1 ? '' : 's'} overlap in time — drag one to resolve, or ask AIsle for a fix.</div>
               )}
             </div>
           )}
@@ -445,7 +464,7 @@ export default function TimelineView({ data, persist, live }) {
           )}
 
           {result && !result.error && (
-            <CascadeResult result={result} sevClass={sevClass} copy={copy} copied={copied} />
+            <CascadeResult result={result} sevClass={sevClass} copy={copy} copied={copied} applied={applied} onApply={() => applyChangesFrom(result)} />
           )}
           {result?.error && <div className="card pad-lg"><span className="badge high">error</span> <span className="muted">{result.error}</span></div>}
         </div>
@@ -473,7 +492,7 @@ export default function TimelineView({ data, persist, live }) {
   )
 }
 
-function CascadeResult({ result, sevClass, copy, copied }) {
+function CascadeResult({ result, sevClass, copy, copied, applied, onApply }) {
   return (
     <div className="stack fade-in">
       <div className="card pad-lg">
@@ -521,7 +540,14 @@ function CascadeResult({ result, sevClass, copy, copied }) {
             {result.fix.tradeoff && <div className="faint" style={{ fontSize: 12.5, marginTop: 10, fontStyle: 'italic' }}>Trade-off: {result.fix.tradeoff}</div>}
             {result.timelineChanges?.length > 0 && (
               <div className="cal-apply-box">
-                <span className="badge ok">✓ {result.timelineChanges.length} event{result.timelineChanges.length === 1 ? '' : 's'} updated on your calendar</span>
+                <span className="faint" style={{ fontSize: 12.5 }}>
+                  Updates {result.timelineChanges.length} event{result.timelineChanges.length === 1 ? '' : 's'} — start/end times shift for everything downstream of the change.
+                </span>
+                {applied ? (
+                  <span className="badge ok">✓ Applied to calendar</span>
+                ) : (
+                  <button className="btn sm primary" onClick={onApply}>Apply to calendar</button>
+                )}
               </div>
             )}
           </div>
