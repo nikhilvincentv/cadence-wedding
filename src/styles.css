@@ -1036,3 +1036,64 @@ a.icon-btn { text-decoration: none; display: inline-flex; align-items: center; }
 }
 .inspo-card:hover .inspo-overlay { opacity: 1; }
 .inspo-title { font-size: 12px; color: #fff; line-height: 1.35; flex: 1; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+/* Calendar (Timeline) */
+.cal-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; }
+.cal-nav { display: flex; align-items: center; gap: 8px; }
+.cal-nav-btn {
+  width: 30px; height: 30px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg-1);
+  color: var(--ink-dim); display: grid; place-items: center; cursor: pointer; font-size: 14px; transition: all 0.15s;
+}
+.cal-nav-btn:hover { border-color: var(--rose-deep); color: var(--ink); }
+.cal-title { font-family: var(--serif); font-size: 19px; font-weight: 600; min-width: 200px; }
+.cal-view-tabs { display: flex; gap: 4px; background: var(--bg-2); border-radius: 999px; padding: 3px; }
+.cal-view-tab {
+  border: none; background: none; padding: 7px 15px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  color: var(--ink-dim); cursor: pointer; transition: all 0.15s;
+}
+.cal-view-tab.active { background: var(--bg-1); color: var(--ink); box-shadow: 0 2px 8px -3px rgba(0,0,0,0.15); }
+.cal-jump-btn { font-size: 12px; }
+
+.cal-day { position: relative; }
+.cal-day-grid { position: relative; border-top: 1px solid var(--line-soft); }
+.cal-hour-row { border-bottom: 1px solid var(--line-soft); }
+.cal-hour-label { position: absolute; left: 0; top: -7px; width: 56px; font-size: 11px; color: var(--ink-faint); text-align: right; padding-right: 10px; }
+.cal-click-layer { cursor: pointer; }
+.cal-event {
+  position: absolute; left: 0; right: 6px; border-radius: 8px; overflow: hidden; cursor: grab;
+  background: linear-gradient(140deg, var(--rose), var(--rose-deep)); color: #fff; padding: 4px 8px;
+  box-shadow: 0 4px 12px -4px rgba(124,84,84,0.5); border: 1px solid rgba(255,255,255,0.2); user-select: none;
+}
+.cal-event:active { cursor: grabbing; }
+.cal-event.locked { cursor: default; background: linear-gradient(140deg, var(--ink-faint), var(--ink-dim)); }
+.cal-event.conflict { outline: 2px solid var(--red); outline-offset: 1px; }
+.cal-event.dragging { opacity: 0.85; z-index: 5; box-shadow: 0 10px 26px -8px rgba(0,0,0,0.4); }
+.cal-event-title { font-size: 12px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-event-sub { font-size: 10.5px; opacity: 0.85; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-event-resize { position: absolute; left: 0; right: 0; bottom: 0; height: 8px; cursor: ns-resize; }
+.cal-event-lock-ico { font-size: 9px; opacity: 0.85; }
+
+.cal-month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--line-soft); border: 1px solid var(--line-soft); border-radius: 12px; overflow: hidden; }
+.cal-month-dow { background: var(--bg-2); padding: 8px 10px; font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-faint); text-align: center; }
+.cal-month-cell { background: var(--bg-1); min-height: 96px; padding: 6px 7px; position: relative; cursor: pointer; transition: background 0.12s; }
+.cal-month-cell:hover { background: var(--bg-2); }
+.cal-month-cell.other-month { background: var(--bg); }
+.cal-month-cell.other-month .cal-month-daynum { color: var(--ink-faint); }
+.cal-month-daynum { font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; }
+.cal-month-cell.today .cal-month-daynum { background: var(--rose-deep); color: #fff; width: 22px; height: 22px; border-radius: 50%; }
+.cal-month-cell.wedding-day { box-shadow: inset 0 0 0 2px var(--rose-deep); }
+.cal-month-cell.wedding-day::after { content: '♥'; position: absolute; top: 6px; right: 8px; font-size: 10px; color: var(--rose-deep); }
+.cal-chip { font-size: 10.5px; padding: 2px 6px; border-radius: 5px; background: var(--rose); color: #3d2323; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-chip-more { font-size: 10px; color: var(--ink-faint); margin-top: 3px; }
+
+.cal-year-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.cal-mini-month { background: var(--bg-1); border: 1px solid var(--line-soft); border-radius: 12px; padding: 12px; }
+.cal-mini-month-title { font-size: 12.5px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+.cal-mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-mini-cell { aspect-ratio: 1; display: grid; place-items: center; font-size: 9.5px; color: var(--ink-faint); border-radius: 5px; cursor: pointer; }
+.cal-mini-cell.in-month { color: var(--ink-dim); }
+.cal-mini-cell.has-event { background: var(--rose); color: #3d2323; font-weight: 700; }
+.cal-mini-cell.today { box-shadow: inset 0 0 0 1.5px var(--rose-deep); }
+.cal-mini-cell.wedding-day { background: var(--rose-deep); color: #fff; font-weight: 700; }
+
+.cal-apply-box { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
