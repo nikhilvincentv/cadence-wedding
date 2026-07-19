@@ -188,7 +188,7 @@ export default function App() {
           <Inbox data={data} persist={persist} live={live} />
         )}
         {view === 'ai' && (
-          <AICoordinator data={data} persist={persist} status={status} />
+          <AICoordinator data={data} persist={persist} status={status} userId={userId} />
         )}
       </main>
 
