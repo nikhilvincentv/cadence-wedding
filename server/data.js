@@ -24,6 +24,181 @@ export function emptyWedding() {
   }
 }
 
+const hoursAgo = (n) => new Date(Date.now() - n * 3600000).toISOString()
+const daysAgo = (n) => new Date(Date.now() - n * 86400000).toISOString()
+
+export function emptyDocuments() {
+  return [
+    {
+      id: 'doc-catering',
+      name: 'Catering_Services_Agreement_V2.pdf',
+      vendorId: 'v2',
+      vendorName: 'Table & Vine Catering',
+      category: 'Catering',
+      sizeLabel: '1.4 MB',
+      source: 'ai-drafted',
+      status: 'action_required',
+      modifiedAt: hoursAgo(2),
+      executedAt: null,
+      paymentsAdded: false,
+      text: `TABLE & VINE CATERING - SERVICE AGREEMENT (DRAFT)
+Category: Catering
+
+PRICING
+Total contract price: $18,216
+
+PAYMENT SCHEDULE
+- Deposit: $6,000 due on signing
+- Balance: $12,216 due 14 days before the event
+
+CANCELLATION POLICY
+Cancellation within 30 days of the event forfeits 75% of the contract total.
+
+NOTES
+Drafted by AIsle from your vendor details. Review the terms below, then sign to send to Table & Vine Catering for countersignature.`,
+      analysis: {
+        vendorName: 'Table & Vine Catering',
+        category: 'Catering',
+        payments: [
+          { label: 'Deposit', amount: 6000, dueDate: 'On signing' },
+          { label: 'Balance', amount: 12216, dueDate: '14 days before event' },
+        ],
+        hiddenFees: [],
+        gratuityIncluded: null,
+        cancellation: 'Cancellation within 30 days forfeits 75% of the contract total.',
+        keyDates: [{ label: 'Balance due', date: '14 days before event' }],
+        watchOuts: [],
+      },
+    },
+    {
+      id: 'doc-floral',
+      name: 'Floral_Design_Contract_Final.pdf',
+      vendorId: 'v-floral',
+      vendorName: 'Fern & Fable Florals',
+      category: 'Florist',
+      sizeLabel: '842 KB',
+      source: 'uploaded',
+      status: 'awaiting_vendor',
+      modifiedAt: daysAgo(1),
+      executedAt: null,
+      paymentsAdded: false,
+      lastRemindedAt: null,
+      text: `FERN & FABLE FLORALS - SERVICE AGREEMENT
+Category: Florist
+
+PRICING
+Total contract price: $2,650
+
+PAYMENT SCHEDULE
+- Deposit (paid): $650 due on booking
+- Balance: $2,000 + $50 delivery fee due September 1
+
+CANCELLATION POLICY
+Deposit is non-refundable within 60 days of the event.
+
+NOTES
+Signed by the couple - awaiting the florist's countersignature.`,
+      analysis: {
+        vendorName: 'Fern & Fable Florals',
+        category: 'Florist',
+        payments: [
+          { label: 'Deposit', amount: 650, dueDate: 'Paid' },
+          { label: 'Balance + delivery', amount: 2050, dueDate: 'September 1' },
+        ],
+        hiddenFees: [{ label: 'Delivery fee', amount: 50, detail: 'Added to final balance' }],
+        gratuityIncluded: null,
+        cancellation: 'Deposit is non-refundable within 60 days of the event.',
+        keyDates: [{ label: 'Balance due', date: 'September 1' }],
+        watchOuts: ['Peonies are out of season in September - garden roses substituted for a similar look.'],
+      },
+    },
+    {
+      id: 'doc-venue',
+      name: 'Venue_Hire_Agreement_WillowsLodge.pdf',
+      vendorId: 'v1',
+      vendorName: 'Willows Lodge',
+      category: 'Venue',
+      sizeLabel: '2.3 MB',
+      source: 'uploaded',
+      status: 'signed',
+      modifiedAt: daysAgo(70),
+      executedAt: daysAgo(70),
+      paymentsAdded: false,
+      text: `WILLOWS LODGE - VENUE HIRE AGREEMENT
+Category: Venue
+
+PRICING
+Total contract price: $12,000
+
+PAYMENT SCHEDULE
+- Deposit (paid): $4,000 due on signing
+- Balance (paid): $8,000 due 30 days before the event
+
+CANCELLATION POLICY
+Full forfeiture of deposit if cancelled within 90 days of the event.
+
+NOTES
+Rain-plan tent included. Getting-ready suites for both parties.`,
+      analysis: {
+        vendorName: 'Willows Lodge',
+        category: 'Venue',
+        payments: [
+          { label: 'Deposit', amount: 4000, dueDate: 'Paid' },
+          { label: 'Balance', amount: 8000, dueDate: 'Paid' },
+        ],
+        hiddenFees: [],
+        gratuityIncluded: null,
+        cancellation: 'Full forfeiture of deposit if cancelled within 90 days of the event.',
+        keyDates: [],
+        watchOuts: [],
+      },
+    },
+    {
+      id: 'doc-photo',
+      name: 'Photography_Services_Agreement.pdf',
+      vendorId: 'v3',
+      vendorName: 'Evergreen Photo Co.',
+      category: 'Photography',
+      sizeLabel: '1.1 MB',
+      source: 'uploaded',
+      status: 'signed',
+      modifiedAt: daysAgo(55),
+      executedAt: daysAgo(55),
+      paymentsAdded: false,
+      text: `EVERGREEN PHOTO CO. - WEDDING PHOTOGRAPHY CONTRACT
+Category: Photography
+
+PRICING
+Total contract price: $5,400
+
+PAYMENT SCHEDULE
+- Retainer (paid): $1,800 due on signing
+- Second payment (paid): $1,800 due 90 days prior
+- Final installment (paid): $1,800 due 30 days before the event
+
+CANCELLATION POLICY
+Retainer is non-refundable.
+
+NOTES
+Overtime billed at $450/hr in 30-min increments beyond the coverage window.`,
+      analysis: {
+        vendorName: 'Evergreen Photo Co.',
+        category: 'Photography',
+        payments: [
+          { label: 'Retainer', amount: 1800, dueDate: 'Paid' },
+          { label: 'Second payment', amount: 1800, dueDate: 'Paid' },
+          { label: 'Final installment', amount: 1800, dueDate: 'Paid' },
+        ],
+        hiddenFees: [{ label: 'Overtime', amount: 450, detail: 'Per hour beyond the coverage window' }],
+        gratuityIncluded: null,
+        cancellation: 'Retainer is non-refundable.',
+        keyDates: [],
+        watchOuts: [],
+      },
+    },
+  ]
+}
+
 export function emptyOnboarding() {
   return {
     firstName: '',
@@ -79,6 +254,7 @@ export function emptyState() {
       { id: 'tk4', text: 'Pay final catering balance', completed: false, due: '2026-08-29' }
     ],
     inspirationBoard: [],
+    documents: emptyDocuments(),
     contractAnalyses: {},
     recommendations: { venues: [], categories: {} },
     negotiations: {},
