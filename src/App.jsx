@@ -58,12 +58,13 @@ export default function App() {
 
   useEffect(() => {
     if (!isLoaded || !userId) return
+    plannedRef.current = false
     getState(userId).then(setData)
   }, [isLoaded, userId])
 
   useEffect(() => {
     if (!data) return
-    if (!data.completedOnboarding || !data.wedding?.couple || plannedRef.current) return
+    if (plannedRef.current) return
     const recs = data.recommendations || {}
     const hasVenues = recs.venues && recs.venues.length
     const hasVendors = recs.categories && Object.keys(recs.categories).length
