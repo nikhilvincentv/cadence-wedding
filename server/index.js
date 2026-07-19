@@ -9,6 +9,7 @@ import { aiStatus, chatJSON } from './ai.js'
 import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser } from './prompts.js'
 import { cascadeFallback, contractFallback } from './fallback.js'
 import { getUserState, saveUserState } from './db.js'
+import coordinatorRouter from './api/coordinator.js'
 
 const app = express()
 app.use(cors())
@@ -82,6 +83,9 @@ app.post('/api/contract', async (req, res) => {
     return res.json({ ...contractFallback(text), source: 'demo', note: String(err.message || err) })
   }
 })
+
+app.use('/api/coordinator', coordinatorRouter)
+
 
 const dist = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist')
 if (existsSync(dist)) {

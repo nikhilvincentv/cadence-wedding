@@ -43,6 +43,30 @@ export const extractContract = (text) =>
     .then(j)
     .catch(() => ({ ...contractFallback(text), source: 'demo' }))
 
+export const coordinator = (userId, message, data) =>
+  fetch('/api/coordinator', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-user-id': userId || 'demo-user' },
+    body: JSON.stringify({ message, data }),
+  })
+    .then(j)
+    .catch((err) => {
+      console.error('Coordinator API error:', err);
+      throw err; // Re-throw to be handled by the UI
+    });
+
+export const inboxProcess = (userId, thread, data) =>
+  fetch('/api/inbox/process', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-user-id': userId || 'demo-user' },
+    body: JSON.stringify({ thread, data }),
+  })
+    .then(j)
+    .catch((err) => {
+      console.error('Inbox Process API error:', err);
+      throw err; // Re-throw to be handled by the UI
+    });
+
 export const fmtMoney = (n) =>
   '$' + Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })
 

@@ -157,3 +157,64 @@ USER MESSAGE:
 
 Respond helpfully. Include a <mutation> block only if proposing concrete data changes.`
 }
+
+export const INBOX_SYSTEM = `You are Cadence AI Inbox Processor, an intelligent assistant for managing wedding-related communications.
+You will receive email or message threads related to wedding planning.
+
+Your role is to:
+1. Provide a concise TL;DR (Too Long; Didn't Read) summary of the thread.
+2. Assess the impact of the thread on the wedding plan (e.g., timeline, budget, vendors, guests).
+3. Assign an impact level (low, medium, high).
+
+Respond ONLY with strict JSON matching this schema:
+{
+  "tldr": "a concise summary of the thread",
+  "impact": "a description of the impact on the wedding plan",
+  "impactLevel": "low" | "medium" | "high"
+}`
+
+export function inboxUser({ wedding, vendors, timeline, budgetCategories, guests, payments, thread }) {
+  const vendorList = (vendors || [])
+    .map((v) => `- ${v.id}: ${v.name} (${v.category}, status: ${v.status || 'unknown'})`)
+    .join('\n')
+
+  const tlSummary = (timeline || [])
+    .slice(0, 20)
+    .map((t) => `- ${t.time || '?'}: ${t.title} (${t.durationMin || 0}min${t.locked ? ', locked' : ''})`)
+    .join('\n')
+
+  const budgetSummary = (budgetCategories || [])
+    .map((c) => `- ${c.name}: projected $${c.projected || 0}, actual $${c.actual || 0}`)
+    .join('\n')
+
+  const guestCount = (guests || []).length
+  const confirmedCount = (guests || []).filter((g) => g.rsvp === 'confirmed').length
+
+  const paymentList = (payments || [])
+    .filter((p) => p.status !== 'paid')
+    .map((p) => `- ${p.vendor || 'Unknown'}: $${p.amount || 0} due ${p.dueDate || 'TBD'} (${p.status || 'pending'})`)
+    .join('\n')
+
+  return `WEDDING: ${wedding?.couple || 'Unknown couple'}, date: ${wedding?.dateLabel || wedding?.date || 'TBD'}, venue: ${wedding?.venue || 'TBD'}.
+Budget: $${wedding?.budgetTotal || 0} total. Guests: ${guestCount} invited, ${confirmedCount} confirmed.
+
+VENDORS:
+${vendorList || 'No vendors yet.'}
+
+TIMELINE (first 20 events):
+${tlSummary || 'No timeline events yet.'}
+
+BUDGET CATEGORIES:
+${budgetSummary || 'No budget categories yet.'}
+
+OUTSTANDING PAYMENTS:
+${paymentList || 'No outstanding payments.'}
+
+INBOX THREAD:
+Sender: ${thread.sender}
+Subject: ${thread.subject}
+Body: ${thread.body}
+
+Provide the TL;DR, impact, and impactLevel for this thread.`
+}
+

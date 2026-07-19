@@ -7,6 +7,7 @@ import Contracts from './views/Contracts.jsx'
 import Budget from './views/Budget.jsx'
 import Guests from './views/Guests.jsx'
 import AICoordinator from './views/AICoordinator.jsx'
+import Inbox from './views/Inbox.jsx'
 import Vendors from './views/Vendors.jsx'
 
 const NAV = [
@@ -116,7 +117,7 @@ export default function App() {
           <div className="view-placeholder">Inspiration — coming soon</div>
         )}
         {view === 'inbox' && (
-          <div className="view-placeholder">Inbox — coming soon</div>
+          <Inbox data={data} persist={persist} />
         )}
         {view === 'ai' && (
           <AICoordinator data={data} persist={persist} status={status} />

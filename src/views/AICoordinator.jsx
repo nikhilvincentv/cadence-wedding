@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import MutationBlock from '../components/MutationBlock'; // Import MutationBlock
+import SkeletonLoader from '../components/SkeletonLoader'; // Import SkeletonLoader
 
 export default function AICoordinator({ data, persist }) {
   const [activeTab, setActiveTab] = useState('timeline');
@@ -13,7 +14,8 @@ export default function AICoordinator({ data, persist }) {
     }
   });
   const [inputText, setInputText] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // New state for loading
+  const [isLoading, setIsLoading] = useState(false);
+  const [aiError, setAiError] = useState(null); // New state for AI errors
 
   const handleApprove = () => {
     if (!pendingProposal) return;
@@ -43,12 +45,23 @@ export default function AICoordinator({ data, persist }) {
   const handleSendMessage = () => {
     if (inputText.trim() === '' || isLoading) return;
     setIsLoading(true);
-    // Simulate API call or processing
+    setAiError(null); // Clear previous errors
+
+    // Simulate API call or processing with a random error
     setTimeout(() => {
-      console.log('Sending message:', inputText);
+      const isError = Math.random() > 0.7; // 30% chance of error
+      if (isError) {
+        setAiError('Failed to get a response from AI. Please try again.');
+      } else {
+        console.log('Sending message:', inputText);
+        // In a real scenario, this would trigger AI response and possibly a new proposal
+      }
       setInputText('');
       setIsLoading(false);
-      // In a real scenario, this would trigger AI response and possibly a new proposal
+      // Clear error after some time if it occurred
+      if (isError) {
+        setTimeout(() => setAiError(null), 5000); // Clear error after 5 seconds
+      }
     }, 1500);
   };
 
@@ -105,6 +118,16 @@ export default function AICoordinator({ data, persist }) {
               onApprove={handleApprove}
               onReject={handleReject}
             />
+          )}
+          {isLoading && (
+            <div className="chat-msg chat-msg-ai">
+              <SkeletonLoader lines={3} />
+            </div>
+          )}
+          {aiError && (
+            <div className="chat-msg chat-msg-ai error-message" style={{ color: 'var(--red)', alignSelf: 'center' }}>
+              <p>{aiError}</p>
+            </div>
           )}
         </div>
         <div className="chat-input-area" style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
