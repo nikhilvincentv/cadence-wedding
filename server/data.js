@@ -43,15 +43,41 @@ export function emptyOnboarding() {
 export function emptyState() {
   return {
     wedding: emptyWedding(),
-    vendors: [],
-    timeline: [],
-    payments: [],
+    vendors: [
+      { id: 'v1', name: 'The Vineyard Estate', category: 'Venue', status: 'contacted', quote: 12000 },
+      { id: 'v2', name: 'Table & Vine Catering', category: 'Catering', status: 'shortlisted', quote: 18216 },
+      { id: 'v3', name: 'Evergreen Photo Co.', category: 'Photography', status: 'booked', quote: 5400 }
+    ],
+    timeline: [
+      { id: 't1', time: '10:00 AM', title: 'Hair and Makeup starts' },
+      { id: 't2', time: '02:00 PM', title: 'Photographer arrives' },
+      { id: 't3', time: '04:00 PM', title: 'Ceremony starts' },
+      { id: 't4', time: '05:30 PM', title: 'Dinner service' }
+    ],
+    payments: [
+      { id: 'p1', label: 'Venue Deposit', amount: 6000, date: '2026-05-01', status: 'paid', source: 'Bank' },
+      { id: 'p2', label: 'Catering Deposit', amount: 6000, date: '2026-06-01', status: 'paid', source: 'Credit Card' },
+      { id: 'p3', label: 'Catering Final', amount: 9200, date: '2026-08-29', status: 'pending', source: 'Bank' }
+    ],
     alerts: [],
-    guests: [],
-    budgetCategories: [],
+    guests: [
+      { id: 'g1', name: 'Sarah Jenkins', relationship: 'Friend', rsvp: 'attending', dietary: 'Vegan' },
+      { id: 'g2', name: 'Michael Jenkins', relationship: 'Friend', rsvp: 'attending', dietary: 'None' },
+      { id: 'g3', name: 'Aunt Carol', relationship: 'Family', rsvp: 'attending', dietary: 'Gluten-Free' }
+    ],
+    budgetCategories: [
+      { id: 'b1', name: 'Venue', projected: 15000, spent: 6000 },
+      { id: 'b2', name: 'Catering', projected: 20000, spent: 6000 },
+      { id: 'b3', name: 'Photography', projected: 6000, spent: 1800 }
+    ],
     seatingTables: [],
     inboxThreads: [],
-    tasks: [],
+    tasks: [
+      { id: 'tk1', text: 'Book the venue', completed: true },
+      { id: 'tk2', text: 'Send save the dates', completed: true },
+      { id: 'tk3', text: 'Finalize guest list', completed: false, due: '2026-08-01' },
+      { id: 'tk4', text: 'Pay final catering balance', completed: false, due: '2026-08-29' }
+    ],
     inspirationBoard: [],
     contractAnalyses: {},
     recommendations: { venues: [], categories: {} },

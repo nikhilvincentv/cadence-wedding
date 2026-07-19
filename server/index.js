@@ -10,6 +10,7 @@ import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser, SEATING_SYS
 import { cascadeFallback, contractFallback, seatingFallback, emailFallback, planFallback, recommendFallback, negotiateFallback, dayPlanFallback } from './fallback.js'
 import { coordinatorHandler } from '../api/coordinator.js'
 import { getUserState, saveUserState } from './db.js'
+import { typesenseEnabled, searchUser, buildDocs, reindexUser } from './typesense.js'
 
 const app = express()
 app.use(cors())
@@ -48,7 +49,12 @@ app.get('/api/state', async (req, res) => {
 app.post('/api/state', async (req, res) => {
   const userId = req.header('x-user-id') || 'demo-user'
   try {
-    res.json(await saveUserState(userId, req.body || {}))
+    const saved = await saveUserState(userId, req.body || {})
+    if (typesenseEnabled) {
+      const docs = buildDocs(userId, req.body || {})
+      await reindexUser(userId, docs).catch(e => console.error('Typesense reindex failed:', e))
+    }
+    res.json(saved)
   } catch (err) {
     res.status(500).json({ ok: false, error: String(err.message || err) })
   }
