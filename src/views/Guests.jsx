@@ -1,6 +1,47 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 
 const uid = () => Math.random().toString(36).slice(2, 9)
+
+// Parse a CSV string into guest objects.
+// Accepts: name, rsvp, meal, gift, relationship, lodging, transport, notes
+// First row must be a header row. Unknown columns are ignored.
+function parseGuestCsv(text) {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim())
+  if (lines.length < 2) return []
+  const headers = lines[0].split(',').map((h) => h.trim().toLowerCase().replace(/[^a-z]/g, ''))
+  return lines.slice(1).map((line) => {
+    // Handle quoted fields with commas inside
+    const cells = []
+    let cur = '', inQ = false
+    for (const ch of line) {
+      if (ch === '"') { inQ = !inQ }
+      else if (ch === ',' && !inQ) { cells.push(cur.trim()); cur = '' }
+      else cur += ch
+    }
+    cells.push(cur.trim())
+
+    const row = {}
+    headers.forEach((h, i) => { row[h] = cells[i] ?? '' })
+
+    const rsvpRaw = (row.rsvp || '').toLowerCase()
+    const rsvp = ['confirmed', 'declined', 'awaiting'].includes(rsvpRaw) ? rsvpRaw : 'awaiting'
+    const relRaw = (row.relationship || '').toLowerCase()
+    const relationship = ['family', 'friends', 'coworkers', 'other'].includes(relRaw) ? relRaw : 'friends'
+    const lodgingRaw = (row.lodging || '').toLowerCase()
+    const lodging = ['none', 'needed', 'arranged'].includes(lodgingRaw) ? lodgingRaw : 'none'
+    const mealRaw = (row.meal || '').toLowerCase()
+    const meal = ['chicken', 'fish', 'vegan', 'kids'].includes(mealRaw) ? mealRaw : ''
+    const transport = /^(yes|true|1)$/i.test(row.transport || '')
+
+    return {
+      id: uid(),
+      name: row.name || 'Unnamed',
+      rsvp, meal, gift: row.gift || '', relationship, lodging, transport,
+      notes: row.notes || '',
+      tableId: null,
+    }
+  }).filter((g) => g.name && g.name !== 'Unnamed')
+}
 
 const RSVP_OPTIONS = ['confirmed', 'declined', 'awaiting']
 const MEAL_OPTIONS = ['', 'chicken', 'fish', 'vegan', 'kids']
@@ -26,21 +67,43 @@ export default function Guests({ data, persist }) {
   const guests = data.guests || []
 
   // ── Editing state ──────────────────────────────────────────────
-  // editing: { guestId, field } | null
   const [editing, setEditing] = useState(null)
   const [editVal, setEditVal] = useState('')
-  const [nameError, setNameError] = useState(null) // guestId with error
+  const [nameError, setNameError] = useState(null)
 
   // ── Selection state ────────────────────────────────────────────
   const [selectedIds, setSelectedIds] = useState(new Set())
 
   // ── Filter state ───────────────────────────────────────────────
-  const [filterRsvp, setFilterRsvp] = useState('') // '' = all
-  const [filterRelationship, setFilterRelationship] = useState('') // '' = all
+  const [filterRsvp, setFilterRsvp] = useState('')
+  const [filterRelationship, setFilterRelationship] = useState('')
 
   // ── Bulk action state ──────────────────────────────────────────
   const [bulkRsvp, setBulkRsvp] = useState('')
   const [bulkMeal, setBulkMeal] = useState('')
+
+  // ── CSV upload ─────────────────────────────────────────────────
+  const csvRef = useRef(null)
+  const [csvMsg, setCsvMsg] = useState(null)
+
+  function handleCsvUpload(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const parsed = parseGuestCsv(ev.target.result || '')
+      if (parsed.length === 0) {
+        setCsvMsg('No valid rows found. Make sure the first row is a header with at least a "name" column.')
+      } else {
+        persist({ ...data, guests: [...guests, ...parsed] })
+        setCsvMsg(`Imported ${parsed.length} guest${parsed.length !== 1 ? 's' : ''}.`)
+      }
+      // Reset input so same file can be re-uploaded
+      e.target.value = ''
+      setTimeout(() => setCsvMsg(null), 4000)
+    }
+    reader.readAsText(file)
+  }
 
   // ── Derived / filtered rows ────────────────────────────────────
   const filteredGuests = guests.filter((g) => {
@@ -198,8 +261,27 @@ export default function Guests({ data, persist }) {
             Track RSVPs, meals, gifts, lodging, and transport for every guest.
           </div>
         </div>
-        <button className="btn primary sm" onClick={addGuest}>+ Add guest</button>
+        <div className="row gap-sm">
+          <input
+            ref={csvRef}
+            type="file"
+            accept=".csv,text/csv"
+            style={{ display: 'none' }}
+            onChange={handleCsvUpload}
+          />
+          <button className="btn sm ghost" onClick={() => csvRef.current?.click()} title="Import guests from a CSV file">
+            ↑ Import CSV
+          </button>
+          <button className="btn primary sm" onClick={addGuest}>+ Add guest</button>
+        </div>
       </div>
+
+      {/* CSV feedback */}
+      {csvMsg && (
+        <div className="card pad-lg" style={{ marginBottom: 12, fontSize: 13 }}>
+          {csvMsg}
+        </div>
+      )}
 
       {/* ── Aggregate count bar ──────────────────────────────────── */}
       <div className="guest-count-bar">

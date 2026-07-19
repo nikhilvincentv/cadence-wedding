@@ -78,6 +78,19 @@ export const runSeating = (body) =>
     body: JSON.stringify(body),
   }).then(j)
 
+export const coordinatorChat = (message, data) =>
+  fetch('/api/coordinator', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, ...data }),
+  })
+    .then(j)
+    .catch(() => ({
+      reply: `I'm running in offline mode. Your message: "${message.slice(0, 80)}${message.length > 80 ? '…' : ''}"`,
+      proposal: null,
+      source: 'demo',
+    }))
+
 export const extractContract = (text) =>
   fetch('/api/contract', {
     method: 'POST',

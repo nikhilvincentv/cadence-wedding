@@ -8,6 +8,7 @@ import { fullState } from './data.js'
 import { aiStatus, chatJSON } from './ai.js'
 import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser, SEATING_SYSTEM, seatingUser, EMAIL_SYSTEM, emailUser, PLAN_SYSTEM, planUser } from './prompts.js'
 import { cascadeFallback, contractFallback, seatingFallback, emailFallback, planFallback } from './fallback.js'
+import { coordinatorHandler } from '../api/coordinator.js'
 import { getUserState, saveUserState } from './db.js'
 import { reindexUser, searchUser, buildDocs, typesenseEnabled } from './typesense.js'
 import { findNearby } from './places.js'
@@ -134,6 +135,8 @@ app.post('/api/email', async (req, res) => {
     return res.json({ ...emailFallback(email), source: 'demo' })
   }
 })
+
+app.post('/api/coordinator', coordinatorHandler)
 
 app.post('/api/contract', async (req, res) => {
   const { text } = req.body || {}
