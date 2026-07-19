@@ -85,7 +85,7 @@ export default function App() {
       .then(([plan, nearby]) => {
         const tasks = (plan.tasks || []).map((d) => ({ id: uid(), checked: false, description: typeof d === 'string' ? d : d.description || d.title || '' }))
         const vendors = (plan.vendors || []).map((v) => ({ id: uid(), name: v.name || 'Vendor', category: v.category || '', contact: '', status: 'pending', rating: null }))
-        const timeline = (plan.timeline || []).map((e) => ({ id: uid(), time: e.time || '12:00 PM', minutes: pm(e.time), title: e.title || 'Event', vendorId: '', durationMin: Number(e.durationMin) || 30, locked: false, note: '' }))
+        const timeline = (plan.timeline || []).map((e) => ({ id: uid(), time: e.time || '12:00 PM', minutes: pm(e.time), title: e.title || 'Event', vendorId: '', durationMin: Number(e.durationMin) || 30, locked: false, note: '', date: data.wedding?.date || '' }))
         const budgetCategories = (plan.budgetCategories || []).map((c) => ({ id: uid(), name: c.name || 'Category', projected: Number(c.projected) || 0, actual: 0 }))
         const nearbyCache = nearby && nearby.center ? { venue, center: nearby.center, vendors: nearby.vendors } : data.nearbyCache || null
         persist({ ...data, tasks, vendors, timeline, budgetCategories, nearbyCache })

@@ -1,3 +1,34 @@
+function parseDelayMinutes(text) {
+  const t = String(text || '').toLowerCase()
+  if (/half\s+(?:an?\s+)?hour/.test(t)) return 30
+  const hourMatch = t.match(/(\d+(?:\.\d+)?)\s*(?:hour|hr)s?/)
+  const minMatch = t.match(/(\d+)\s*(?:minute|min)s?/)
+  let mins = 0
+  if (hourMatch) mins += Math.round(parseFloat(hourMatch[1]) * 60)
+  else if (/\ban?\s+hour\b/.test(t)) mins += 60
+  if (minMatch) mins += parseInt(minMatch[1], 10)
+  if (mins === 0 && /late|delay|behind|push(ed)?|held up|running/.test(t)) mins = 30
+  return mins
+}
+
+function minutesToTime(mins) {
+  const m = ((Math.round(mins) % 1440) + 1440) % 1440
+  let h = Math.floor(m / 60)
+  const min = m % 60
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  let h12 = h % 12
+  if (h12 === 0) h12 = 12
+  return `${h12}:${String(min).padStart(2, '0')} ${ampm}`
+}
+
+function timeToMinutes(time) {
+  const m = String(time || '').match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i)
+  if (!m) return 0
+  let h = Number(m[1]) % 12
+  if (m[3] && m[3].toUpperCase() === 'PM') h += 12
+  return h * 60 + Number(m[2])
+}
+
 const PHOTO_LATE = {
   summary:
     "Photographer arriving an hour late compresses every getting-ready shot and puts the first look at risk.",
@@ -94,44 +125,62 @@ const RAIN = {
   ],
 }
 
-function genericCascade(change) {
+function genericCascade(change, timeline) {
+  const delay = parseDelayMinutes(change)
+  const movable = (timeline || []).filter((e) => !e.locked).sort((a, b) => (a.minutes || 0) - (b.minutes || 0))
+  const timelineChanges = delay > 0
+    ? movable.map((e) => ({ eventId: e.id, newTime: minutesToTime((e.minutes || 0) + delay), newDurationMin: e.durationMin }))
+    : []
+
   return {
     summary: `AIsle traced the ripple effects of: "${change}".`,
-    severity: 'medium',
+    severity: delay >= 60 ? 'high' : 'medium',
     reasoning: [
       'Located every timeline event and vendor the change touches.',
       'Checked each downstream event against locked constraints and the sunset window.',
       'Flagged overlaps and any vendor whose contract window is affected.',
-      'Composed a minimal fix that keeps the locked ceremony and golden hour intact.',
+      timelineChanges.length
+        ? `Composed a minimal fix: shift every unlocked block ${delay} min later to absorb the change.`
+        : 'Composed a minimal fix that keeps the locked ceremony and golden hour intact.',
     ],
     conflicts: [
       { title: 'Downstream timing pressure', detail: 'Later events lose their buffers and crowd the next block.', vendorId: 'photo', impact: 'medium' },
       { title: 'Vendor windows to re-confirm', detail: 'Affected vendors need updated call times to avoid gaps.', vendorId: 'catering', impact: 'low' },
     ],
     fix: {
-      headline: 'Absorb the change earlier in the day to protect the locked ceremony and golden hour.',
-      changes: [
-        { target: 'Earliest flexible block', action: 'Shift start time to reclaim the lost buffer.' },
-        { target: 'Affected vendors', action: 'Send updated call times so nobody arrives to a gap.' },
-      ],
-      tradeoff: 'Minor earlier start; ceremony and sunset photos untouched.',
+      headline: timelineChanges.length
+        ? `Shift every unlocked block ${delay} min later to absorb the change.`
+        : 'Absorb the change earlier in the day to protect the locked ceremony and golden hour.',
+      changes: timelineChanges.length
+        ? [{ target: `${timelineChanges.length} unlocked event${timelineChanges.length === 1 ? '' : 's'}`, action: `Push ${delay} min later.` }]
+        : [
+            { target: 'Earliest flexible block', action: 'Shift start time to reclaim the lost buffer.' },
+            { target: 'Affected vendors', action: 'Send updated call times so nobody arrives to a gap.' },
+          ],
+      tradeoff: 'Minor later start across the board; locked events (ceremony, permits) untouched.',
     },
+    timelineChanges,
     notifications: [
       { vendorId: 'planner', vendorName: 'Day-of coordination', channel: 'text', message: `Heads up - timeline change ("${change}"). AIsle has re-sequenced the affected blocks; updated call times going out to vendors now.` },
     ],
   }
 }
 
-export function cascadeFallback(change = '') {
+export function cascadeFallback(change = '', timeline = []) {
   const c = change.toLowerCase()
-  if (c.includes('rain') || c.includes('weather') || c.includes('storm')) return RAIN
+  const shiftAll = (mins) =>
+    (timeline || [])
+      .filter((e) => !e.locked)
+      .map((e) => ({ eventId: e.id, newTime: minutesToTime((e.minutes || 0) + mins), newDurationMin: e.durationMin }))
+
+  if (c.includes('rain') || c.includes('weather') || c.includes('storm')) return { ...RAIN, timelineChanges: [] }
   if (
     (c.includes('photo') || c.includes('camera') || c.includes('shooter')) &&
     /late|hour|delay|behind|arrive|instead|ran long|12:30|running/.test(c)
   )
-    return PHOTO_LATE
-  if (c.includes('ceremony') || c.includes('traffic') || c.includes('guest')) return CEREMONY_LATE
-  return genericCascade(change)
+    return { ...PHOTO_LATE, timelineChanges: shiftAll(parseDelayMinutes(change) || 60) }
+  if (c.includes('ceremony') || c.includes('traffic') || c.includes('guest')) return { ...CEREMONY_LATE, timelineChanges: shiftAll(parseDelayMinutes(change) || 30) }
+  return genericCascade(change, timeline)
 }
 
 export function contractFallback(text = '') {
@@ -251,6 +300,34 @@ export function planFallback({ wedding = {}, profile = {} } = {}) {
   ]
 
   return { summary: 'Starter plan generated from your questionnaire — edit anything.', tasks, vendors, timeline, budgetCategories }
+}
+
+export function dayPlanFallback({ date = '', description = '' } = {}) {
+  const d = description.toLowerCase()
+  const events = []
+
+  if (/rehearsal/.test(d)) {
+    events.push({ time: '5:00 PM', title: 'Ceremony rehearsal', durationMin: 45 })
+    events.push({ time: '6:30 PM', title: 'Rehearsal dinner', durationMin: 120 })
+  }
+  if (/brunch|breakfast/.test(d)) {
+    events.push({ time: /farewell|goodbye|morning.after|last/.test(d) ? '10:30 AM' : '10:00 AM', title: /farewell|goodbye/.test(d) ? 'Farewell brunch' : 'Welcome brunch', durationMin: 90 })
+  }
+  if (/dinner/.test(d) && !/rehearsal/.test(d)) events.push({ time: '7:00 PM', title: 'Dinner', durationMin: 120 })
+  if (/lunch/.test(d)) events.push({ time: '12:30 PM', title: 'Lunch', durationMin: 90 })
+  if (/golf|hike|beach|pool|activity|outing|excursion/.test(d)) events.push({ time: '10:00 AM', title: 'Group activity', durationMin: 180 })
+  if (/spa|massage|mani|pedi/.test(d)) events.push({ time: '11:00 AM', title: 'Spa time', durationMin: 120 })
+  if (/welcome party|welcome drinks|cocktail/.test(d)) events.push({ time: '6:00 PM', title: 'Welcome drinks', durationMin: 90 })
+
+  if (events.length === 0) {
+    events.push({ time: '11:00 AM', title: description.trim().slice(0, 60) || 'Gathering', durationMin: 120 })
+  }
+
+  events.sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time))
+  return {
+    summary: `Planned ${events.length} event${events.length === 1 ? '' : 's'} for ${date} based on: "${description}"`,
+    events,
+  }
 }
 
 export function emailFallback(email = {}) {

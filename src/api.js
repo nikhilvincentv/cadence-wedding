@@ -1,5 +1,5 @@
 import { fullState } from '../server/data.js'
-import { cascadeFallback, contractFallback } from '../server/fallback.js'
+import { cascadeFallback, contractFallback, dayPlanFallback } from '../server/fallback.js'
 
 const j = (r) => {
   if (!r.ok) throw new Error(`Request failed: ${r.status}`)
@@ -32,7 +32,7 @@ export const runCascade = (body) =>
     body: JSON.stringify(body),
   })
     .then(j)
-    .catch(() => ({ ...cascadeFallback(body.change), source: 'demo' }))
+    .catch(() => ({ ...cascadeFallback(body.change, body.timeline), source: 'demo' }))
 
 export const generatePlan = (wedding, profile) =>
   fetch('/api/plan', {
@@ -42,6 +42,15 @@ export const generatePlan = (wedding, profile) =>
   })
     .then(j)
     .catch(() => ({ error: 'Could not generate plan.' }))
+
+export const generateDayPlan = (date, description, wedding) =>
+  fetch('/api/dayplan', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ date, description, wedding }),
+  })
+    .then(j)
+    .catch(() => ({ ...dayPlanFallback({ date, description }), source: 'demo' }))
 
 export const scanEmail = (email) =>
   fetch('/api/email', {

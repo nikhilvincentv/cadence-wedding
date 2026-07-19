@@ -6,8 +6,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { fullState } from './data.js'
 import { aiStatus, chatJSON } from './ai.js'
-import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser, SEATING_SYSTEM, seatingUser, EMAIL_SYSTEM, emailUser, PLAN_SYSTEM, planUser } from './prompts.js'
-import { cascadeFallback, contractFallback, seatingFallback, emailFallback, planFallback } from './fallback.js'
+import { CASCADE_SYSTEM, cascadeUser, CONTRACT_SYSTEM, contractUser, SEATING_SYSTEM, seatingUser, EMAIL_SYSTEM, emailUser, PLAN_SYSTEM, planUser, DAY_PLAN_SYSTEM, dayPlanUser } from './prompts.js'
+import { cascadeFallback, contractFallback, seatingFallback, emailFallback, planFallback, dayPlanFallback } from './fallback.js'
 import { getUserState, saveUserState } from './db.js'
 import { reindexUser, searchUser, buildDocs, typesenseEnabled } from './typesense.js'
 import { findNearby } from './places.js'
@@ -63,7 +63,7 @@ app.post('/api/cascade', async (req, res) => {
     })
     return res.json({ ...result, source: 'model' })
   } catch (err) {
-    return res.json({ ...cascadeFallback(change), source: 'demo', note: String(err.message || err) })
+    return res.json({ ...cascadeFallback(change, payload.timeline), source: 'demo', note: String(err.message || err) })
   }
 })
 
@@ -121,6 +121,17 @@ app.post('/api/plan', async (req, res) => {
     return res.json({ ...result, source: 'model' })
   } catch (err) {
     return res.json({ ...planFallback({ wedding, profile }), source: 'demo' })
+  }
+})
+
+app.post('/api/dayplan', async (req, res) => {
+  const { date, description, wedding } = req.body || {}
+  if (!date || !description) return res.status(400).json({ error: 'Missing date or description.' })
+  try {
+    const result = await chatJSON({ system: DAY_PLAN_SYSTEM, user: dayPlanUser({ date, description, wedding }), temperature: 0.4, maxTokens: 900 })
+    return res.json({ ...result, source: 'model' })
+  } catch (err) {
+    return res.json({ ...dayPlanFallback({ date, description }), source: 'demo', note: String(err.message || err) })
   }
 })
 

@@ -27,12 +27,19 @@ Respond ONLY with strict JSON matching this schema:
     "changes": [ { "target": "which event/vendor", "action": "what to change" } ],
     "tradeoff": "one honest caveat, or empty string"
   },
+  "timelineChanges": [
+    { "eventId": "the exact [id] of an existing event from the input", "newTime": "1:20 PM", "newDurationMin": 30 }
+  ],
   "notifications": [
     { "vendorId": "hmua", "vendorName": "Glow Studio", "channel": "text|email",
       "message": "the drafted message" }
   ]
 }
-vendorId must be one of the ids provided in the input.`
+vendorId must be one of the ids provided in the input.
+timelineChanges must directly implement your recommended fix as concrete, machine-applicable edits to the
+existing timeline: only include an entry when that event's start time or duration actually needs to change,
+using its exact eventId from the input. Never include a locked event in timelineChanges. If your fix does not
+require moving or resizing any event (e.g. a location-only change), return an empty array.`
 
 export function cascadeUser({ wedding, vendors, timeline, change, profile }) {
   const vendorList = vendors
@@ -206,6 +213,31 @@ STYLE: ${profile?.style || 'unspecified'}
 PLANNING STAGE: ${profile?.stage || 'unspecified'}
 
 Build their starter plan and respond with the JSON described in your instructions.`
+}
+
+export const DAY_PLAN_SYSTEM = `You are AIsle, an AI wedding-day planning engine.
+A couple is describing a single day around their wedding (rehearsal dinner, welcome brunch, post-wedding
+farewell gathering, a day trip, etc.) in their own words. Build a realistic hour-by-hour schedule for
+that one day only, tailored to what they actually described.
+
+Respond ONLY with strict JSON:
+{
+  "summary": "one sentence describing the day you planned",
+  "events": [ { "time": "6:00 PM", "title": "Rehearsal dinner begins", "durationMin": 120 }, ... ]
+}
+Rules:
+- 3-8 events for this single day, in chronological order with realistic durations.
+- Times use a 12-hour clock with AM/PM, e.g. "6:00 PM".
+- Titles are short and specific to what the couple described - do not invent unrelated events.
+- Do not repeat the main wedding-day events (ceremony, reception) unless the couple's description is
+  explicitly about the wedding day itself.`
+
+export function dayPlanUser({ date, description, wedding }) {
+  return `WEDDING: ${wedding?.couple || 'the couple'}, main wedding date ${wedding?.dateLabel || wedding?.date || 'TBD'}.
+DATE TO PLAN: ${date}
+COUPLE'S DESCRIPTION OF THIS DAY: "${description}"
+
+Build the schedule for this specific day and respond with the JSON described in your instructions.`
 }
 
 export const EMAIL_SYSTEM = `You are AIsle's inbox intelligence. You read a wedding vendor email
